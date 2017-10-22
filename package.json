@@ -1,0 +1,9 @@
+{
+   "name": "hopsmtp",
+   "description": "smtp mailer",
+   "version": "0.1.0",
+   "license": "?",
+   "author": { "name": "Manuel Serrano" },
+   "main": "hopsmtp.js",
+   "engines": { "hop": ">=3.1.0" },
+}

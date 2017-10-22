@@ -1,0 +1,136 @@
+#!/bin/sh
+#*=====================================================================*/
+#*    serrano/prgm/utils/hopsmtp/configure                             */
+#*    -------------------------------------------------------------    */
+#*    Author      :  Manuel Serrano                                    */
+#*    Creation    :  Sat Jul 31 06:49:37 2004                          */
+#*    Last change :  Mon Oct  9 16:35:38 2017 (serrano)                */
+#*    Copyright   :  2004-17 Manuel Serrano                            */
+#*    -------------------------------------------------------------    */
+#*    HOPSTMP autoconfiguration                                        */
+#*=====================================================================*/
+
+#*---------------------------------------------------------------------*/
+#*    User flags                                                       */
+#*---------------------------------------------------------------------*/
+prefix=/usr/local
+etcdir=$prefix/etc
+libdir=$prefix/lib/hopsmtp
+bindir=$prefix/bin
+mandir=$prefix/man
+
+hop=hop
+
+hopc=hopc
+hflags=-O2
+
+version=`grep version package.json | awk '{ print $2 }' | sed 's/[",]//g'`
+main=`grep main package.json | awk '{ print $2 }' | sed 's/[",]//g'`
+
+# environment parsing
+if [ "$HFLAGS " != " " ]; then
+  hflags=$HFLAGS;
+fi
+
+# Argument parsing
+while : ; do
+  case $1 in
+    "")
+      break;;
+
+    --prefix=*)
+      prefix="`echo $1 | sed 's/^[^=]*=//'`";
+      bindir=$prefix/bin;
+      libdir=$prefix/lib/hopsmtp;
+      mandir=$prefix/man/$mansec;
+      etcdir=$prefix/etc;
+      contribsdir=$prefix/share/hop/contribs
+      docdir=$prefix/share/doc/hop;;
+
+    --etcdir=*)
+      etcdir="`echo $1 | sed 's/^[^=]*=//'`";;
+
+    --bindir=*)
+      bindir="`echo $1 | sed 's/^[^=]*=//'`";;
+
+    --libdir=*)
+      libdir="`echo $1 | sed 's/^[^=]*=//'`";;
+
+    --mandir=*)
+      mandir="`echo $1 | sed 's/^[^=]*=//'`"/$mansec;;
+
+    --hopc=*)
+      hopc="`echo $1 | sed 's/^[^=]*=//'`"/$mansec;;
+
+    --hflags=*)
+      hflags="`echo $1 | sed 's/^[^=]*=//'`"/$mansec;;
+
+    -*)
+      echo "*** Configure error, unknown option $1" >&2;
+      echo >&2;
+      echo "Usage: configure [options]" >&2;
+      echo "" >&2;
+      echo "options:" >&2;
+      echo "   --hop=path................. hop command" >&2;
+      echo "   --hopc=path................ hopc command" >&2;
+      echo "   --hflags=flags............. hopc flags" >&2;
+      echo "   --prefix=dir............... prefix to HOP install" >&2;
+      echo "   --etcdir=dir............... Hop etc directory" >&2;
+      echo "   --bindir=dir............... alternative Hop bin directory" >&2;
+      echo "   --libdir=dir............... alternative Hop lib directory" >&2;
+      echo "   --mandir=dir............... alternative Hop man directory" >&2;
+      echo "" >&2;
+      exit 255;
+  esac
+  shift
+done
+
+#*---------------------------------------------------------------------*/
+#*    sopath                                                           */
+#*---------------------------------------------------------------------*/
+sofile=`$hop --eval '(print (hop-sofile-path "dummy"))' --no-server --libs-dir $libdir/$version/libs --sofile-policy none`
+sodir=`dirname $sofile`
+
+#*---------------------------------------------------------------------*/
+#*    Create directories                                               */
+#*---------------------------------------------------------------------*/
+for p in bin/hopsmtp configure.js Makefile; do
+  cat $p.in \
+      | sed -e "s|@RELEASE@|$version|g" \
+            -e "s|@BRANCH@|$branch|g" \
+            -e "s|@MAIN@|$main|g" \
+            -e "s|@DATE@|$date|g" \
+            -e "s|@DEVEL@|$devel|g" \
+            -e "s|@DEBUG@|$debug|g" \
+            -e "s|@BUILDDIR@|$PWD|g" \
+            -e "s|@BINDIR@|$bindir|g" \
+            -e "s|@LIBDIR@|$libdir|g" \
+            -e "s|@LIBPATH@|$libdir/hop/$version|g" \
+            -e "s|@HOP@|$hop|g" \
+            -e "s|@HOPC@|$hopc|g" \
+            -e "s|@HFLAGS@|$hflags|g" \
+            -e "s|@SODIR@|$sodir|g" \
+  > $p
+done
+
+chmod a+rx bin/hopsmtp
+
+#*---------------------------------------------------------------------*/
+#*    Summary                                                          */
+#*---------------------------------------------------------------------*/
+
+# Generate the config.status file to please debian packages
+echo "configuration completed" > config.status
+
+echo "** Configuration summary **"
+echo 
+echo "Release:"
+echo "  hopsmtp release number................ $version"
+echo "  hop command........................... $hop"
+echo "  hopc command.......................... $hopc"
+echo "  hflags ............................... $hflags"
+echo "  etc directory......................... $etcdir"
+echo "  bin directory......................... $bindir"
+echo "  lib directory......................... $libdir"
+echo "  man directory......................... $mandir"
+

@@ -1,0 +1,21 @@
+{
+   "port": 587,
+   "host": "mail2-relais-roc.national.inria.fr",
+   "requireTLS": true,
+   "authMethod": "LOGIN",
+   "name": "host.domain.fr",
+   
+   "login": {
+      "user": "XXXX",
+      "pass": "YYYY"
+   },
+
+   "outOfMail": {
+      "hours": [ [20, 24], [0, 8] ],
+      "days": [ "sat", "sun" ]
+   },
+
+   "immediateDelivery": [
+      "foo@bar.fr", "gee@bidule.fr"
+   ]
+}

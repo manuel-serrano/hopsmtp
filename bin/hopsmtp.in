@@ -1,0 +1,13 @@
+#!/bin/bash
+#*=====================================================================*/
+#*    serrano/prgm/utils/hopsmtp/bin/hopsmtp.in                        */
+#*    -------------------------------------------------------------    */
+#*    Author      :  Manuel Serrano                                    */
+#*    Creation    :  Sat Oct  1 17:03:18 2016                          */
+#*    Last change :  Thu Nov 10 14:21:53 2016 (serrano)                */
+#*    Copyright   :  2016 Manuel Serrano                               */
+#*    -------------------------------------------------------------    */
+#*    HOPSMTP, sendmail replacement.                                   */
+#*=====================================================================*/
+
+hop -g -q --no-server --libs-dir @LIBDIR@/@RELEASE@/libs -- @LIBDIR@/@RELEASE@/@MAIN@ -g $*
