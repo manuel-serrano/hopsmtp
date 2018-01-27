@@ -1,10 +1,10 @@
 #*=====================================================================*/
-#*    serrano/prgm/utils/hopsmtp/Makefile                              */
+#*    serrano/prgm/utils/hopsmtp/Makefile.in                           */
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Mon Oct 23 01:08:22 2017 (serrano)                */
-#*    Copyright   :  2016-17 Manuel Serrano                            */
+#*    Last change :  Thu Jan 11 14:54:42 2018 (serrano)                */
+#*    Copyright   :  2016-18 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
 #*=====================================================================*/
@@ -33,7 +33,7 @@ OBJECTS = hopsmtp.js \
 
 SOFILES = $(OBJECTS:%.js=%.so)
 
-SODIR= /usr/local/lib/hopsmtp/0.1.1/libs/3.2.0/1fc6834d303cd051f8a15d5f2c180af0/linux-i686
+SODIR= /usr/local/lib/hopsmtp/0.1.1/libs/3.2.0/8f1ff95e56f46031c6f233a1b99f5bb0/linux-x86_64
 
 LIBS=$(SOFILES:%=libs/%)
 
@@ -66,12 +66,9 @@ install:
 	cp -rf node_modules $(LIBDIR)/$(RELEASE)
 	cp -rf hopsmtp.js $(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(LIBDIR)/$(RELEASE)
-	for p in $(OBJECTS:%.js=%.so); do \
-           b=`basename $$p .so`; \
-           qf=$(SODIR)/$$p; \
-           t=`$(HOP) --no-zeroconf --no-server --eval "(print (string-append \"$$b-\" (md5sum \"$$qf\") \".so\"))"`; \
-	   echo "cp $$p $(SODIR)/$$t"; \
-	   cp $$p $(SODIR)/$$t; \
+	for p in $(OBJECTS:%.js=%); do \
+           t=`$(HOP) --no-server --eval "(print (basename (hop-sofile-path \"$(LIBDIR)/$(RELEASE)/$$p.js\")))"`; \
+	   cp $$p.so $(SODIR)/`basename $$t`; \
         done
 	chmod a+rx -R $(LIBDIR)
 

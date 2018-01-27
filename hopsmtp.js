@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Mon Oct 23 00:52:50 2017 (serrano)                */
+/*    Last change :  Fri Dec 29 09:02:22 2017 (serrano)                */
 /*    Copyright   :  2016-17 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -579,7 +579,7 @@ function onSmtpConnect( config, conn ) {
 /*    onSmtpError ...                                                  */
 /*---------------------------------------------------------------------*/
 function onSmtpError( config, err ) {
-   syslog.log( syslog.LOG_ERR, "Cannot connect " + JSON.stringify( err ) );
+   syslog.log( syslog.LOG_ERR, "Cannot connect: " + err.toString() );
    
    var msg = "Cannot connect to \"" + config.host + ":" + config.port + "\"";
    debug( msg, err, "\n" );
