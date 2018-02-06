@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Thu Jan 11 14:54:42 2018 (serrano)                */
+#*    Last change :  Mon Feb  5 19:20:27 2018 (serrano)                */
 #*    Copyright   :  2016-18 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -33,7 +33,8 @@ OBJECTS = hopsmtp.js \
 
 SOFILES = $(OBJECTS:%.js=%.so)
 
-SODIR= /usr/local/lib/hopsmtp/0.1.1/libs/3.2.0/8f1ff95e56f46031c6f233a1b99f5bb0/linux-x86_64
+SODIR= /usr/local/lib/hopsmtp/0.1.1/libs/3.2.0/aab998fa531b420aac916cbfa6ec614f/linux-i686
+JSDIR = $(LIBDIR)/$(RELEASE)
 
 LIBS=$(SOFILES:%=libs/%)
 
@@ -57,20 +58,22 @@ do: $(SOFILES)
 #*---------------------------------------------------------------------*/
 #*    install                                                          */
 #*---------------------------------------------------------------------*/
-install:
+install: install-libs
 	cp bin/hopsmtp $(BINDIR)/hopsmtp && chmod a+rx $(BINDIR)/hopsmtp
 	cp bin/hopsmtp $(BINDIR)/hopsmtp
 	mkdir -p $(LIBDIR)
 	mkdir -p $(LIBDIR)/$(RELEASE)
-	mkdir -p $(SODIR)
 	cp -rf node_modules $(LIBDIR)/$(RELEASE)
 	cp -rf hopsmtp.js $(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(LIBDIR)/$(RELEASE)
+	chmod a+rx -R $(LIBDIR)
+
+install-libs:
+	mkdir -p $(SODIR)
 	for p in $(OBJECTS:%.js=%); do \
-           t=`$(HOP) --no-server --eval "(print (basename (hop-sofile-path \"$(LIBDIR)/$(RELEASE)/$$p.js\")))"`; \
+           t=`$(HOP) --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
 	   cp $$p.so $(SODIR)/`basename $$t`; \
         done
-	chmod a+rx -R $(LIBDIR)
 
 #*---------------------------------------------------------------------*/
 #*    clean                                                            */

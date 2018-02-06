@@ -3,8 +3,8 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Fri Dec 29 09:02:22 2017 (serrano)                */
-/*    Copyright   :  2016-17 Manuel Serrano                            */
+/*    Last change :  Mon Feb  5 18:05:58 2018 (serrano)                */
+/*    Copyright   :  2016-18 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
 /*=====================================================================*/
@@ -599,8 +599,9 @@ function onSmtpError( config, err ) {
 /*    main ...                                                         */
 /*---------------------------------------------------------------------*/
 async function main() {
-   const args = require( 'minimist' )( process.argv.slice( 2 ),
-				       { names: ["-oi", "-bp", "-oQ", "-os"] });
+   const argv = process.argv.slice( hop.standalone ? 1 : 2 );
+   const minimist = require( 'minimist' );
+   const args = minimist( argv, { names: ["-oi", "-bp", "-oQ", "-os"] });
 
    if( args.h || args.help ) {
       console.log( "hopsmpt v" + require( "./configure.js" ).version );
