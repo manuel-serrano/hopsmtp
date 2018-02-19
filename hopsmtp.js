@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Mon Feb  5 18:05:58 2018 (serrano)                */
+/*    Last change :  Tue Feb  6 20:11:42 2018 (serrano)                */
 /*    Copyright   :  2016-18 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -316,12 +316,12 @@ function sendMidMessageQueue( config, conn, mid ) {
 
    if( i ) {
       let p = path.join( config.queue, files[ i ] );
-      readMessage( fs.createReadStream( p ) )
+      return readMessage( fs.createReadStream( p ) )
 	 .then( o => sendMessage( config, conn, o ) )
 	 .then( o => fs.unlinkSync( p ) )
 	 .then( o => fs.close(), o => fs.close() )
    } else {
-      new Promise( function( resolve, reject ) {
+      return new Promise( function( resolve, reject ) {
 	 reject( "Not such message \"" + mid + "\"" );
       } )
    }
