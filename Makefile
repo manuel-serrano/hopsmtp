@@ -33,7 +33,7 @@ OBJECTS = hopsmtp.js \
 
 SOFILES = $(OBJECTS:%.js=%.so)
 
-SODIR= /usr/local/lib/hopsmtp/0.1.1/libs/3.2.0/aab998fa531b420aac916cbfa6ec614f/linux-i686
+SODIR= /usr/local/lib/hopsmtp/0.1.1/libs/3.2.0/39c13560d0bec8064aaa5f7b85299bff/linux-x86_64
 JSDIR = $(LIBDIR)/$(RELEASE)
 
 LIBS=$(SOFILES:%=libs/%)
