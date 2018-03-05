@@ -4,11 +4,11 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Oct  1 17:03:18 2016                          */
-#*    Last change :  Mon Feb  5 17:45:03 2018 (serrano)                */
+#*    Last change :  Wed Feb 21 16:32:31 2018 (serrano)                */
 #*    Copyright   :  2016-18 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSMTP, sendmail replacement.                                   */
 #*=====================================================================*/
 
 #hop -g -q --no-server --libs-dir @LIBDIR@/@RELEASE@/libs -- @LIBDIR@/@RELEASE@/@MAIN@ -g $*
-hop --sofile-policy nte+ -q --no-server --libs-dir /tmp/$USER/cache/hop/0 -- @LIBDIR@/@RELEASE@/@MAIN@ $*
+hop --sofile-policy nte1 -q --no-server --libs-dir /tmp/$USER/cache/hop/0 -- @LIBDIR@/@RELEASE@/@MAIN@ $*
