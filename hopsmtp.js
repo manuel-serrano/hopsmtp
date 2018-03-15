@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Tue Feb  6 20:11:42 2018 (serrano)                */
+/*    Last change :  Thu Mar 15 08:17:05 2018 (serrano)                */
 /*    Copyright   :  2016-18 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -618,7 +618,7 @@ async function main() {
       console.log( "  -wq        Process the queue only if in work period" );
       console.log( "  -t         Read message, searching for recipients" );
       console.log( "  --force    Force sending immediately" );
-      process.exit( 1 );
+      process.exit( 0 );
    }
 
    var config = loadConfig( args );
