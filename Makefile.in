@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Thu Mar 15 08:32:49 2018 (serrano)                */
+#*    Last change :  Fri Mar 16 13:47:26 2018 (serrano)                */
 #*    Copyright   :  2016-18 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -23,11 +23,12 @@ ICONV = $(ICONVLIB:%=lib/%) $(ICONVENC:%=encodings/%)
 
 MINIMIST = index.js
 
-SMTPLIB = lib/data-stream.js lib/smtp-connection.js
+SMTPLIB = lib/data-stream.js lib/smtp-connection.js 
 SMTPSHARED = node_modules/nodemailer-shared/lib/shared.js \
-  node_modules/nodemailer-shared/node_modules/lib/cookies.js \
-  node_modules/nodemailer-shared/node_modules/lib/fetch.js \
-SMTP = $(SMTPLIB) $(DMTPSHARED)
+  node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib/cookies.js \
+  node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib/fetch.js \
+  node_modules/httpntlm/ntlm.js
+SMTP = $(SMTPLIB) $(SMTPSHARED)
 
 OBJECTS = hopsmtp.js \
   $(ICONV:%=node_modules/iconv-lite/%) \
@@ -45,6 +46,7 @@ LIBS=$(SOFILES:%=libs/%)
 #*    do:                                                              */
 #*---------------------------------------------------------------------*/
 do: $(SOFILES)
+	echo $(SMTP)
 
 #*---------------------------------------------------------------------*/
 #*    .suffixes                                                        */
@@ -75,7 +77,7 @@ install: install-libs
 install-libs:
 	mkdir -p $(SODIR)
 	for p in $(OBJECTS:%.js=%); do \
-           t=`$(HOP) --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
+           t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
 	   cp $$p.so $(SODIR)/`basename $$t`; \
         done
 
