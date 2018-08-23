@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Mon Feb  5 18:08:43 2018 (serrano)                */
+#*    Last change :  Thu Aug 23 05:59:43 2018 (serrano)                */
 #*    Copyright   :  2004-18 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -20,7 +20,6 @@ bindir=$prefix/bin
 mandir=$prefix/man
 
 hop=hop
-
 hopc=hopc
 hflags=-O2
 
