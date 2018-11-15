@@ -3,3 +3,4 @@ mail.example
 Makefile
 bin/hopsmtp
 config.status
+*.so

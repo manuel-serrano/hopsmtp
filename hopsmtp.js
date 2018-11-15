@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu Mar 15 08:17:05 2018 (serrano)                */
+/*    Last change :  Thu Nov 15 07:07:25 2018 (serrano)                */
 /*    Copyright   :  2016-18 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -16,8 +16,8 @@
 const SMTPConnection = require( 'smtp-connection' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const syslog = require( hop.syslog );
 const iconv = require( "iconv-lite" );
+let syslog = require( hop.syslog );
 
 /*---------------------------------------------------------------------*/
 /*    constant                                                         */
@@ -48,6 +48,7 @@ function debug( ... args ) {
       fs.writeSync( dbg.fd, dbg.date );
       fs.writeSync( dbg.fd, "] " );
       args.forEach( a => fs.writeSync( dbg.fd, toString( a ) ) );
+      fs.writeSync( dbg.fd, "\n" );
    }
 }
 
@@ -215,7 +216,7 @@ function readMessage( stream ) {
 		  const bccs = normalizeEmails( bcc[ 1 ] );
 		  receivers = receivers.concat( bccs );
 	       }
-	    debug( "rec=", receivers );
+	       debug( "receivers=", receivers );
 
 	       resolve( { to: receivers,
 			  from: normalizeEmail( from ? from[ 1 ] : args.f ),
@@ -238,7 +239,7 @@ function sendMessage( config, conn, message ) {
    return new Promise( function( resolve, reject ) {
       function logSent( info ) {
 	 syslog.log( syslog.LOG_INFO, "Sent mail for " + message.from
-		     + " (" + config.host + ")"
+		     + " (" + conn.config.host + ")"
 		     + " uid=" + process.getuid()
 		     + " username=" + (process.env.USERNAME || process.env.LOGNAME)
 		     + " outbytes=" + message.msg.length );
@@ -246,21 +247,21 @@ function sendMessage( config, conn, message ) {
 
       function logError( err ) {
 	 syslog.log( syslog.LOG_ERROR, "Cannot sent mail for " + message.from
-		     + " (" + config.host + ")"
+		     + " (" + conn.config.host + ")"
 		     + " uid=" + process.getuid()
 		     + " username=" + (process.env.USERNAME || process.env.LOGNAME)
 		     + " outbytes=" + message.msg.length
 		     + err.toString() );
       }
 
-      debug( "sending mail to ", message.to, "\n" );
+      debug( "sending mail to ", message.to );
       const buf = iconv.encode( message.msg, "latin1" );
-      debug( "encoded ", message.msg.length, " characters\n" );
+      debug( "encoded ", message.msg.length, " characters" );
       
       message.use8BitMime = true;
       
       conn.send( message, buf, (err, info) => {
-	 debug( "sent " + (err ? info : "ok") + "\n" );
+	 			  debug( "sent " + (err ? info : "ok") );
 	 if( err == null ) {
 	    logSent( info );
 	    resolve( info );
@@ -286,7 +287,7 @@ function flushMessageQueue( config, conn ) {
 	    var file = iterator.next();
 
 	    if( !file.done ) {
-	       debug( "flushing message ", file.value, "\n" );
+	       debug( "flushing message ", file.value );
 
 	       let p = path.join( config.queue, file.value );
 	       readMessage( fs.createReadStream( p ) )
@@ -341,7 +342,7 @@ function sendRecipientMessageQueue( config, conn, recipient ) {
 	    var file = iterator.next();
 
 	    if( !file.done ) {
-	       debug( "flushing message ", file.value, "\n" );
+	       debug( "flushing message ", file.value );
 
 	       let p = path.join( config.queue, file.value );
 	       readMessage( fs.createReadStream( p ) )
@@ -421,15 +422,40 @@ function messageQueue( config, message ) {
 /*    openSMTPConnection ...                                           */
 /*---------------------------------------------------------------------*/
 function openSMTPConnection( config ) {
-   syslog.log( syslog.LOG_INFO, "Creating "
-	       + ((config.secure || config.requireTLS) ? "SSL" : "")
-	       + " connection to " + config.host );
-   debug( "connecting to " + config.host + "\n" );
+   
+   function open( server ) {
+      syslog.log( syslog.LOG_INFO, "Creating "
++ ((server.secure || server.requireTLS) ? "SSL" : "")
+	       + " connection to " + server.host );
+      debug( "connecting to " + server.host );
    return new Promise( function( resolve, reject ) {
-      const conn = new SMTPConnection( config );
+      const conn = new SMTPConnection( server );
       conn.on( 'error', reject );
-      conn.connect( v => conn.login( config.login, () => resolve( conn ) ) );
+      conn.connect( v => conn.login( server.login, () => resolve( conn ) ) );
    } );
+}
+   
+   function loop( resolve, reject, i ) {
+      debug( "in loop i=", i, " len=", config.servers.length );
+      if( i >= config.servers.length ) {
+	 reject( "no server available!" );
+      } else {
+		const server = config.servers[ i ];
+		debug( "trying server: ", 
+		       config.servers[ i ].host + ":" + config.servers[ i ].port );
+	 	return open( server )
+	       	      .then( conn => { 
+				debug( "connection succeeded: ", server );
+				conn.config = server; resolve( conn ) 
+			     },
+err => {
+   debug( "connection failed: ", server );
+   loop( resolve, reject, i + 1 );
+} )
+   }
+   }
+   
+   return new Promise( (resolve, reject) => loop( resolve, reject, 0 ) );
 }
 
 /*---------------------------------------------------------------------*/
@@ -445,7 +471,7 @@ function outOfMail( config ) {
 	 let h = dt.getHours();
 	 
 	 for( let i = 0; i < hours.length; i++ ) {
-	    if( hours[ i ] == h ) {
+	    if( hours[ i ] === h ) {
 	       return true;
 	    }
 	    if( hours[ i ] instanceof Array
@@ -500,7 +526,7 @@ function sendp( config, msg ) {
    }
 
    if( config.args.os ) {
-      debug( "queuing (out-of-mail, command line)\n" );
+      debug( "queuing (out-of-mail, command line)" );
       return false;
    }
    if( config.args.force ) {
@@ -510,15 +536,15 @@ function sendp( config, msg ) {
       return true;
    }
    if( outOfMail( config ) ) {
-      debug( "queuing (out-of-mail, json)\n" );
+      debug( "queuing (out-of-mail, json)" );
       return false;
    }
    if( ("outOfMail" in config.rc) ? config.rc.outOfMail( config ) : false ) {
-      debug( "queuing (out-of-mail, rc)\n" );
+      debug( "queuing (out-of-mail, rc)" );
       return false;
    }
    if( config.state.outOfMail ) {
-      debug( "queuing (out-of-mail, state)\n" );
+      debug( "queuing (out-of-mail, state)" );
       return false;
    }
    
@@ -530,7 +556,7 @@ function sendp( config, msg ) {
 /*---------------------------------------------------------------------*/
 function onSmtpConnect( config, conn ) {
    debug( "connection established \""
-	  + config.host + ":" + config.port + "\"\n" );
+	  + conn.config.host + ":" + conn.config.port + "\"" );
 
    if( config.args.q ) {
       debug( "process the queue" );
@@ -555,19 +581,19 @@ function onSmtpConnect( config, conn ) {
 	 .then( o => exit( conn, 0 ) )
 	 .catch( o => fail( conn, o, 1 ) );
    } else {
-      debug( "reading mail from stdin...\n" );
+      debug( "reading mail from stdin..." );
       readMessage( process.stdin )
 	 .then( msg => {
-	    debug( "message read [" + msg.msg.length + "]\n" );
+	    debug( "message read [" + msg.msg.length + "]" );
 	    if( sendp( config, msg ) ) {
-	       debug( "start sending message...\n" );
+	       debug( "start sending message..." );
 	       sendMessage( config, conn, msg )
 		  .then( o => { if( !config.args.force ) return flushMessageQueue( config, conn ) } )
 		  .then( o => exit( conn, 0 ) )
 		  .catch( o => fail( conn, o, 1 ) );
 	       
 	    } else {
-	       debug( "queuing message...\n" );
+	       debug( "queuing message..." );
 	       messageQueue( config, msg );
 	       exit( conn, 0 );
 	    }
@@ -581,8 +607,8 @@ function onSmtpConnect( config, conn ) {
 function onSmtpError( config, err ) {
    syslog.log( syslog.LOG_ERR, "Cannot connect: " + err.toString() );
    
-   var msg = "Cannot connect to \"" + config.host + ":" + config.port + "\"";
-   debug( msg, err, "\n" );
+   var msg = "Cannot connect to \"" + err.toString() + "\"";
+   debug( msg, err );
    
    if( !config.args.q ) {
       debug( "reading message" );
@@ -618,6 +644,7 @@ async function main() {
       console.log( "  -wq        Process the queue only if in work period" );
       console.log( "  -t         Read message, searching for recipients" );
       console.log( "  --force    Force sending immediately" );
+      console.log( "  -g         Internal debug" );
       process.exit( 0 );
    }
 
@@ -629,23 +656,31 @@ async function main() {
    config.rc = rc;
    config.state = state;
 
-   if( args.g == true ) {
+   if( args.g === true ) {
       dbg = {
 	 fd: fs.openSync( config.log || "/tmp/hopsmtp.log", "a" ),
 	 date: new Date()
+      }
+      syslog = {
+	 log: function( ...args ) { debug.apply( undefined, args ) },
+LOG_INFO: "info: ",
+LOG_ERROR: "error: ",
+open: function( path, mode ) { }
       }
    }
    if( args.oQ ) {
       config.queue = args.oQ;
    }
 
-   if( args.queue == "on" ) {
+   if( args.queue === "on" ) {
       setQueuing( true );
       exit( false, 0 );
-   } else if( args.queue == "off" ) {
+   } else if( args.queue === "off" ) {
       setQueuing( false );
       exit( false, 0 );
-   } if( args.action == "show" || args.bp ) {
+   } 
+	  
+	  if( args.action === "show" || args.bp ) {
       await showQueue( config ); 
       exit( false, 0 );
    } else {
