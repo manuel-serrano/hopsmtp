@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Fri Mar 16 13:47:26 2018 (serrano)                */
+#*    Last change :  Thu Nov 22 12:02:43 2018 (serrano)                */
 #*    Copyright   :  2016-18 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -45,7 +45,7 @@ LIBS=$(SOFILES:%=libs/%)
 #*---------------------------------------------------------------------*/
 #*    do:                                                              */
 #*---------------------------------------------------------------------*/
-do: $(SOFILES)
+do: $(SOFILES) configure.so
 	echo $(SMTP)
 
 #*---------------------------------------------------------------------*/
@@ -76,7 +76,7 @@ install: install-libs
 
 install-libs:
 	mkdir -p $(SODIR)
-	for p in $(OBJECTS:%.js=%); do \
+	for p in $(OBJECTS:%.js=%) configure; do \
            t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
 	   cp $$p.so $(SODIR)/`basename $$t`; \
         done
