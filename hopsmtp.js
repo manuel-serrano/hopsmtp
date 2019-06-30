@@ -3,8 +3,8 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu Nov 15 07:07:25 2018 (serrano)                */
-/*    Copyright   :  2016-18 Manuel Serrano                            */
+/*    Last change :  Sat Jun 29 18:43:31 2019 (serrano)                */
+/*    Copyright   :  2016-19 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
 /*=====================================================================*/
@@ -424,35 +424,36 @@ function messageQueue( config, message ) {
 function openSMTPConnection( config ) {
    
    function open( server ) {
-      syslog.log( syslog.LOG_INFO, "Creating "
-+ ((server.secure || server.requireTLS) ? "SSL" : "")
-	       + " connection to " + server.host );
+      syslog.log( syslog.LOG_INFO, 
+	 "Creating "
+	 + ((server.secure || server.requireTLS) ? "SSL" : "")
+	 + " connection to " + server.host );
       debug( "connecting to " + server.host );
-   return new Promise( function( resolve, reject ) {
-      const conn = new SMTPConnection( server );
-      conn.on( 'error', reject );
-      conn.connect( v => conn.login( server.login, () => resolve( conn ) ) );
-   } );
-}
+      return new Promise( function( resolve, reject ) {
+      	 const conn = new SMTPConnection( server );
+      	 conn.on( 'error', reject );
+      	 conn.connect( v => conn.login( server.login, () => resolve( conn ) ) );
+      } );
+   }
    
    function loop( resolve, reject, i ) {
       debug( "in loop i=", i, " len=", config.servers.length );
       if( i >= config.servers.length ) {
 	 reject( "no server available!" );
       } else {
-		const server = config.servers[ i ];
-		debug( "trying server: ", 
-		       config.servers[ i ].host + ":" + config.servers[ i ].port );
-	 	return open( server )
-	       	      .then( conn => { 
-				debug( "connection succeeded: ", server );
-				conn.config = server; resolve( conn ) 
-			     },
-err => {
-   debug( "connection failed: ", server );
-   loop( resolve, reject, i + 1 );
-} )
-   }
+	 const server = config.servers[ i ];
+	 debug( "trying server: ", 
+	    config.servers[ i ].host + ":" + config.servers[ i ].port );
+	 return open( server )
+	    .then( conn => { 
+	       debug( "connection succeeded: ", server );
+	       conn.config = server; resolve( conn ) 
+	    },
+	       err => {
+   		  debug( "connection failed: ", server );
+   		  loop( resolve, reject, i + 1 );
+	       } )
+      }
    }
    
    return new Promise( (resolve, reject) => loop( resolve, reject, 0 ) );
@@ -680,7 +681,7 @@ open: function( path, mode ) { }
       exit( false, 0 );
    } 
 	  
-	  if( args.action === "show" || args.bp ) {
+   if( args.action === "show" || args.bp ) {
       await showQueue( config ); 
       exit( false, 0 );
    } else {

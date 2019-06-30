@@ -4,8 +4,8 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Thu Aug 23 05:59:43 2018 (serrano)                */
-#*    Copyright   :  2004-18 Manuel Serrano                            */
+#*    Last change :  Sat Jun 29 17:52:06 2019 (serrano)                */
+#*    Copyright   :  2004-19 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
 #*=====================================================================*/
@@ -56,13 +56,13 @@ while : ; do
       libdir="`echo $1 | sed 's/^[^=]*=//'`";;
 
     --mandir=*)
-      mandir="`echo $1 | sed 's/^[^=]*=//'`"/$mansec;;
+      mandir="`echo $1 | sed 's/^[^=]*=//'`";;
 
     --hopc=*)
-      hopc="`echo $1 | sed 's/^[^=]*=//'`"/$mansec;;
+      hopc="`echo $1 | sed 's/^[^=]*=//'`";;
 
     --hflags=*)
-      hflags="`echo $1 | sed 's/^[^=]*=//'`"/$mansec;;
+      hflags="`echo $1 | sed 's/^[^=]*=//'`";;
 
     -*)
       if [ $1 != "--help" ]; then
