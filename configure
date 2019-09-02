@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Sat Jun 29 17:52:06 2019 (serrano)                */
+#*    Last change :  Thu Aug  8 16:10:38 2019 (serrano)                */
 #*    Copyright   :  2004-19 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -135,4 +135,5 @@ echo "  etc directory......................... $etcdir"
 echo "  bin directory......................... $bindir"
 echo "  lib directory......................... $libdir"
 echo "  man directory......................... $mandir"
+echo "  so directory.......................... $sodir"
 
