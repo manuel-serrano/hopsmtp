@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Tue Sep  3 10:00:49 2019 (serrano)                */
+/*    Last change :  Tue Sep  3 10:19:13 2019 (serrano)                */
 /*    Copyright   :  2016-19 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -100,7 +100,7 @@ function loadConfig( args ) {
       if( cfg ) {
 	 config = require( cfg );
       } else {
-	 throw "Cannot find \"hopsmpt.json\""; 
+	 throw "Cannot find \"hopsmtp.json\""; 
       }
    }
 
