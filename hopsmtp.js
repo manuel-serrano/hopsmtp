@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Sat Jun 29 18:43:31 2019 (serrano)                */
+/*    Last change :  Tue Sep  3 10:00:49 2019 (serrano)                */
 /*    Copyright   :  2016-19 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -16,6 +16,7 @@
 const SMTPConnection = require( 'smtp-connection' );
 const fs = require( 'fs' );
 const path = require( 'path' );
+const os = require( 'os' );
 const iconv = require( "iconv-lite" );
 let syslog = require( hop.syslog );
 
@@ -56,8 +57,8 @@ function debug( ... args ) {
 /*    findConfigFile ...                                               */
 /*---------------------------------------------------------------------*/
 function findConfigFile( file ) {
-   const host = process.env.HOST;
    const home = process.env.HOME;
+   const host = os.hostname();
    const configdir = path.join( home, ".config", "hop", "hopsmtp" );
    const base = file.split( "." );
    const name = base[ 0 ];
