@@ -3,8 +3,8 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Fri Apr 26 10:28:07 2019 (serrano)                */
-#*    Copyright   :  2016-19 Manuel Serrano                            */
+#*    Last change :  Mon Mar 30 05:52:59 2020 (serrano)                */
+#*    Copyright   :  2016-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
 #*=====================================================================*/
@@ -40,7 +40,7 @@ SOFILES = $(OBJECTS:%.js=%.so)
 SODIR= @SODIR@
 JSDIR = $(LIBDIR)/$(RELEASE)
 
-LIBS=$(SOFILES:%=libs/%)
+SO=$(SOFILES:%=so/%)
 
 #*---------------------------------------------------------------------*/
 #*    do:                                                              */
@@ -63,7 +63,7 @@ do: $(SOFILES) configure.so
 #*---------------------------------------------------------------------*/
 #*    install                                                          */
 #*---------------------------------------------------------------------*/
-install: install-libs
+install: install-so
 	cp bin/hopsmtp $(BINDIR)/hopsmtp && chmod a+rx $(BINDIR)/hopsmtp
 	cp bin/hopsmtp $(BINDIR)/hopsmtp
 	mkdir -p $(LIBDIR)
@@ -74,7 +74,7 @@ install: install-libs
 	chmod a+rx -R $(LIBDIR)
 	find $(LIBDIR) -name '*.so' -exec touch {} \;
 
-install-libs:
+install-so:
 	mkdir -p $(SODIR)
 	for p in $(OBJECTS:%.js=%) configure; do \
            t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
