@@ -3,8 +3,8 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Tue Sep  3 10:19:13 2019 (serrano)                */
-/*    Copyright   :  2016-19 Manuel Serrano                            */
+/*    Last change :  Sat Apr  4 07:29:32 2020 (serrano)                */
+/*    Copyright   :  2016-20 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
 /*=====================================================================*/
@@ -160,7 +160,7 @@ async function showQueue( config ) {
 	    .then( msg => {
 	       const subject = msg.head.match( /^[ \t]*Subject:[ \t]*([^\r\n]+)/mi );
 	       console.log( "  ", file, "[" + fs.statSync( qf ).ctime + "]" );
-	       console.log( "     to:", msg.to.join( ", " ) );
+	       console.log( "     to:", msg.all.join( ", " ) );
 	       if( subject ) console.log( "     subject:", subject[ 1 ] );
 	    } );
       } ) );
@@ -219,7 +219,8 @@ function readMessage( stream ) {
 	       }
 	       debug( "receivers=", receivers );
 
-	       resolve( { to: receivers,
+	       resolve( { to: to,
+			  all: receivers,
 			  from: normalizeEmail( from ? from[ 1 ] : args.f ),
 			  head: hd,
 			  msg: msg } );
@@ -522,6 +523,7 @@ function fail( conn, msg, status ) {
 function sendp( config, msg ) {
    
    function immediateDelivery( msg ) {
+      console.debug( "Immediate msg=", msg );
       return msg.to.find( function( to ) {
 	 return config.immediateDelivery.indexOf( to.toLowerCase() ) >= 0;
       } )

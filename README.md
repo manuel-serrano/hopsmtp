@@ -9,4 +9,4 @@ To test:
 
 To debug if something goes wrong with compiled files:
 
-  hop -v10 --no-zeroconf --sofile-policy nte1 -q --no-server --so-dir /usr/local/lib/hopsmtp/0.2.0/so -- /usr/local/lib/hopsmtp/0.2.0/hopsmtp.js < mail.example
+  hop -v10 --no-zeroconf --so-policy nte1 -q --no-server --so-dir /usr/local/lib/hopsmtp/0.2.0/so -- /usr/local/lib/hopsmtp/0.2.0/hopsmtp.js < mail.example
