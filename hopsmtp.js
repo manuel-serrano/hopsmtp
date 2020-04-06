@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Sat Apr  4 07:29:32 2020 (serrano)                */
+/*    Last change :  Mon Apr  6 13:13:32 2020 (serrano)                */
 /*    Copyright   :  2016-20 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -207,20 +207,21 @@ function readMessage( stream ) {
 
 	    if( to ) {
 	       let receivers = normalizeEmails( to[ 1 ] );
+	       let all = receivers;
 
 	       if( cc ) {
 		  const ccs = normalizeEmails( cc[ 1 ] );
-		  receivers = receivers.concat( ccs );
+		  all = receivers.concat( ccs );
 	       }
 
 	       if( bcc ) {
 		  const bccs = normalizeEmails( bcc[ 1 ] );
-		  receivers = receivers.concat( bccs );
+		  all = receivers.concat( bccs );
 	       }
-	       debug( "receivers=", receivers );
+	       debug( "to=", receivers, " all=", all );
 
-	       resolve( { to: to,
-			  all: receivers,
+	       resolve( { to: receivers,
+			  all: all,
 			  from: normalizeEmail( from ? from[ 1 ] : args.f ),
 			  head: hd,
 			  msg: msg } );
@@ -523,12 +524,12 @@ function fail( conn, msg, status ) {
 function sendp( config, msg ) {
    
    function immediateDelivery( msg ) {
-      console.debug( "Immediate msg=", msg );
       return msg.to.find( function( to ) {
 	 return config.immediateDelivery.indexOf( to.toLowerCase() ) >= 0;
       } )
    }
 
+   debug( "sendp msg=", msg );
    if( config.args.os ) {
       debug( "queuing (out-of-mail, command line)" );
       return false;
