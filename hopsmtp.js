@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Mon Apr  6 13:13:32 2020 (serrano)                */
+/*    Last change :  Fri Apr 10 09:05:26 2020 (serrano)                */
 /*    Copyright   :  2016-20 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -191,11 +191,14 @@ function readMessage( stream ) {
    return new Promise( function( resolve, reject ) {
       var msg = "";
       
+      debug( "read message...in promise" );
       stream.on( 'data', data => {
+	 debug( "stream.on ", data );
 	 msg += iconv.decode( data, "latin1" );
       } );
 
       stream.on( 'end', data => {
+	 debug( "stream.end ", data );
 	 const sep = msg.match( /(?:\r?\n){2}/ );
 
 	 if( sep ) {
@@ -433,6 +436,7 @@ function openSMTPConnection( config ) {
 	 + " connection to " + server.host );
       debug( "connecting to " + server.host );
       return new Promise( function( resolve, reject ) {
+      	 debug( "in connecting promise..." );
       	 const conn = new SMTPConnection( server );
       	 conn.on( 'error', reject );
       	 conn.connect( v => conn.login( server.login, () => resolve( conn ) ) );

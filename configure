@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Mon Mar 30 05:53:46 2020 (serrano)                */
+#*    Last change :  Fri Apr 10 13:37:36 2020 (serrano)                */
 #*    Copyright   :  2004-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -90,8 +90,23 @@ done
 #*---------------------------------------------------------------------*/
 #*    sopath                                                           */
 #*---------------------------------------------------------------------*/
-sofile=`$hop --eval '(print (hop-sofile-path "dummy"))' --no-server --so-dir $libdir/$version/so --so-policy none`
-sodir=`dirname $sofile`
+hopversion=`$hop --configure --version`
+buildid=`$hop --configure --build-id`
+buildarch=`$hop --configure --build-arch`
+sodirname=`$hop --configure --so-dirname`
+sodir="$libdir/$version/so/hop/$hopversion/$buildid/$buildarch"
+
+#*---------------------------------------------------------------------*/
+#*    checking hop installation                                        */
+#*---------------------------------------------------------------------*/
+libdir=`$hop --configure --libdir`
+
+syslog=$libdir/hop/$hopversion/node_modules/syslog/lib/so/$sodirname/syslog.so
+
+if [ ! -f $syslog ]; then
+  echo "*** ERROR: Cannot find $syslog"
+  exit 1
+fi
 
 #*---------------------------------------------------------------------*/
 #*    Create directories                                               */
@@ -106,8 +121,8 @@ for p in bin/hopsmtp configure.js Makefile; do
             -e "s|@DEBUG@|$debug|g" \
             -e "s|@BUILDDIR@|$PWD|g" \
             -e "s|@BINDIR@|$bindir|g" \
-            -e "s|@LIBDIR@|$libdir|g" \
-            -e "s|@LIBPATH@|$libdir/hop/$version|g" \
+            -e "s|@LIBDIR@|$libdir/hopsmtp|g" \
+            -e "s|@LIBPATH@|$libdir/hop/$hopversion|g" \
             -e "s|@HOP@|$hop|g" \
             -e "s|@HOPC@|$hopc|g" \
             -e "s|@HFLAGS@|$hflags|g" \
@@ -133,7 +148,7 @@ echo "  hopc command.......................... $hopc"
 echo "  hflags ............................... $hflags"
 echo "  etc directory......................... $etcdir"
 echo "  bin directory......................... $bindir"
-echo "  lib directory......................... $libdir"
+echo "  lib directory......................... $libdir/hopsmtp"
 echo "  man directory......................... $mandir"
 echo "  so directory.......................... $sodir"
 
