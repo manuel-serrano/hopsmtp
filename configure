@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Fri Apr 10 13:37:36 2020 (serrano)                */
+#*    Last change :  Tue Apr 14 08:35:55 2020 (serrano)                */
 #*    Copyright   :  2004-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -58,6 +58,9 @@ while : ; do
     --mandir=*)
       mandir="`echo $1 | sed 's/^[^=]*=//'`";;
 
+    --hop=*)
+      hop="`echo $1 | sed 's/^[^=]*=//'`";;
+
     --hopc=*)
       hopc="`echo $1 | sed 's/^[^=]*=//'`";;
 
@@ -91,16 +94,15 @@ done
 #*    sopath                                                           */
 #*---------------------------------------------------------------------*/
 hopversion=`$hop --configure --version`
+libdir=`$hop --configure --libdir`
 buildid=`$hop --configure --build-id`
 buildarch=`$hop --configure --build-arch`
 sodirname=`$hop --configure --so-dirname`
-sodir="$libdir/$version/so/hop/$hopversion/$buildid/$buildarch"
+sodir="$libdir/hopsmtp/$version/so/hop/$hopversion/$buildid/$buildarch"
 
 #*---------------------------------------------------------------------*/
 #*    checking hop installation                                        */
 #*---------------------------------------------------------------------*/
-libdir=`$hop --configure --libdir`
-
 syslog=$libdir/hop/$hopversion/node_modules/syslog/lib/so/$sodirname/syslog.so
 
 if [ ! -f $syslog ]; then

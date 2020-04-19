@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Fri Apr 10 09:05:26 2020 (serrano)                */
+/*    Last change :  Fri Apr 17 07:14:26 2020 (serrano)                */
 /*    Copyright   :  2016-20 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -160,7 +160,7 @@ async function showQueue( config ) {
 	    .then( msg => {
 	       const subject = msg.head.match( /^[ \t]*Subject:[ \t]*([^\r\n]+)/mi );
 	       console.log( "  ", file, "[" + fs.statSync( qf ).ctime + "]" );
-	       console.log( "     to:", msg.all.join( ", " ) );
+	       console.log( "     to:", msg.to.join( ", " ) );
 	       if( subject ) console.log( "     subject:", subject[ 1 ] );
 	    } );
       } ) );
@@ -198,34 +198,33 @@ function readMessage( stream ) {
       } );
 
       stream.on( 'end', data => {
-	 debug( "stream.end ", data );
-	 const sep = msg.match( /(?:\r?\n){2}/ );
+	 try {
+	    debug( "stream.end" );
+	    const sep = msg.match( /(?:\r?\n){2}/ );
 
-	 if( sep ) {
-	    const hd = msg.substring( msg, sep.index );
-	    const to = hd.match( /^[ \t]*To:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
-	    const cc = hd.match( /^[ \t]*cc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
-	    const bcc = hd.match( /^[ \t]*bcc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
-	    const from = hd.match( /^[ \t]*From:[ \t]*([^\r\n]+)/mi );
+	    if( sep ) {
+	       const hd = msg.substring( msg, sep.index );
+	       const hdto = hd.match( /^[ \t]*To:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
+	       const hdcc = hd.match( /^[ \t]*cc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
+	       const hdbcc = hd.match( /^[ \t]*bcc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
+	       const hdfrom = hd.match( /^[ \t]*From:[ \t]*([^\r\n]+)/mi );
 
-	    if( to ) {
-	       let receivers = normalizeEmails( to[ 1 ] );
-	       let all = receivers;
+	       if( hdto ) {
+	       	  const target = normalizeEmails( hdto[ 1 ] );
+	       	  let to = target;
 
-	       if( cc ) {
-		  const ccs = normalizeEmails( cc[ 1 ] );
-		  all = receivers.concat( ccs );
-	       }
+	       	  if( hdcc ) {
+		     to = to.concat( normalizeEmails( hdcc[ 1 ] ) );
+	       	  }
 
-	       if( bcc ) {
-		  const bccs = normalizeEmails( bcc[ 1 ] );
-		  all = receivers.concat( bccs );
-	       }
-	       debug( "to=", receivers, " all=", all );
+	       	  if( hdbcc ) {
+		     to = to.concat( normalizeEmails( hdbcc[ 1 ] ) );
+	       	  }
+	       	  debug( "to=", to, " target=", target );
 
-	       resolve( { to: receivers,
-			  all: all,
-			  from: normalizeEmail( from ? from[ 1 ] : args.f ),
+	       	  resolve( { to: to,
+			     target: target,
+			     from: normalizeEmail( hdfrom ? hdfrom[ 1 ] : args.f ),
 			  head: hd,
 			  msg: msg } );
 	    } else {
@@ -234,7 +233,7 @@ function readMessage( stream ) {
 	 } else {
 	    reject( "Cannot find header" );
 	 }
-      } );
+      	 } catch( e ) { #:exception-notify( e ); throw( e ); } }  );
    } );
 }
 
@@ -261,13 +260,14 @@ function sendMessage( config, conn, message ) {
       }
 
       debug( "sending mail to ", message.to );
+
       const buf = iconv.encode( message.msg, "latin1" );
       debug( "encoded ", message.msg.length, " characters" );
-      
+      	 
       message.use8BitMime = true;
-      
+      	 
       conn.send( message, buf, (err, info) => {
-	 			  debug( "sent " + (err ? info : "ok") );
+	 debug( "sent " + (err ? info : "ok") );
 	 if( err == null ) {
 	    logSent( info );
 	    resolve( info );
@@ -353,7 +353,7 @@ function sendRecipientMessageQueue( config, conn, recipient ) {
 	       let p = path.join( config.queue, file.value );
 	       readMessage( fs.createReadStream( p ) )
 		  .then( o => {
-		     if( o.receivers.indexOf( recipient ) ) {
+		     if( o.to.indexOf( recipient ) ) {
 			return sendMessage( config, conn, o )
 			   .then( o => fs.unlinkSync( p ) );
 		     } else {
@@ -528,8 +528,10 @@ function fail( conn, msg, status ) {
 function sendp( config, msg ) {
    
    function immediateDelivery( msg ) {
-      return msg.to.find( function( to ) {
-	 return config.immediateDelivery.indexOf( to.toLowerCase() ) >= 0;
+      debug( "immedia msg=", msg );
+      debug( "immedia msg.target=", msg.target );
+      return msg.target.find( function( tgt ) {
+	 return config.immediateDelivery.indexOf( tgt.toLowerCase() ) >= 0;
       } )
    }
 
@@ -688,7 +690,7 @@ open: function( path, mode ) { }
       setQueuing( false );
       exit( false, 0 );
    } 
-	  
+
    if( args.action === "show" || args.bp ) {
       await showQueue( config ); 
       exit( false, 0 );
