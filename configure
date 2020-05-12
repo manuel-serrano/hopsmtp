@@ -4,11 +4,22 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Mon Mar 30 05:53:46 2020 (serrano)                */
+#*    Last change :  Tue Apr 14 07:31:27 2020 (serrano)                */
 #*    Copyright   :  2004-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
 #*=====================================================================*/
+
+#*---------------------------------------------------------------------*/
+#*    configure parameters                                             */
+#*---------------------------------------------------------------------*/
+hz=hopsmtp
+version=`grep version package.json | awk '{ print $2 }' | sed 's/[",]//g'`
+license=`grep license package.json | awk '{ print $2 }' | sed 's/[",]//g'`
+date=`date +'%d %B %Y'`
+minor=
+
+license=gpl
 
 #*---------------------------------------------------------------------*/
 #*    User flags                                                       */
@@ -23,7 +34,6 @@ hop=hop
 hopc=hopc
 hflags=-O2
 
-version=`grep version package.json | awk '{ print $2 }' | sed 's/[",]//g'`
 main=`grep main package.json | awk '{ print $2 }' | sed 's/[",]//g'`
 
 # environment parsing
