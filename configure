@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Tue Apr 14 07:31:27 2020 (serrano)                */
+#*    Last change :  Tue Apr 14 08:35:55 2020 (serrano)                */
 #*    Copyright   :  2004-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -68,6 +68,9 @@ while : ; do
     --mandir=*)
       mandir="`echo $1 | sed 's/^[^=]*=//'`";;
 
+    --hop=*)
+      hop="`echo $1 | sed 's/^[^=]*=//'`";;
+
     --hopc=*)
       hopc="`echo $1 | sed 's/^[^=]*=//'`";;
 
@@ -100,8 +103,22 @@ done
 #*---------------------------------------------------------------------*/
 #*    sopath                                                           */
 #*---------------------------------------------------------------------*/
-sofile=`$hop --eval '(print (hop-sofile-path "dummy"))' --no-server --so-dir $libdir/$version/so --so-policy none`
-sodir=`dirname $sofile`
+hopversion=`$hop --configure --version`
+libdir=`$hop --configure --libdir`
+buildid=`$hop --configure --build-id`
+buildarch=`$hop --configure --build-arch`
+sodirname=`$hop --configure --so-dirname`
+sodir="$libdir/hopsmtp/$version/so/hop/$hopversion/$buildid/$buildarch"
+
+#*---------------------------------------------------------------------*/
+#*    checking hop installation                                        */
+#*---------------------------------------------------------------------*/
+syslog=$libdir/hop/$hopversion/node_modules/syslog/lib/so/$sodirname/syslog.so
+
+if [ ! -f $syslog ]; then
+  echo "*** ERROR: Cannot find $syslog"
+  exit 1
+fi
 
 #*---------------------------------------------------------------------*/
 #*    Create directories                                               */
@@ -116,8 +133,8 @@ for p in bin/hopsmtp configure.js Makefile; do
             -e "s|@DEBUG@|$debug|g" \
             -e "s|@BUILDDIR@|$PWD|g" \
             -e "s|@BINDIR@|$bindir|g" \
-            -e "s|@LIBDIR@|$libdir|g" \
-            -e "s|@LIBPATH@|$libdir/hop/$version|g" \
+            -e "s|@LIBDIR@|$libdir/hopsmtp|g" \
+            -e "s|@LIBPATH@|$libdir/hop/$hopversion|g" \
             -e "s|@HOP@|$hop|g" \
             -e "s|@HOPC@|$hopc|g" \
             -e "s|@HFLAGS@|$hflags|g" \
@@ -143,7 +160,7 @@ echo "  hopc command.......................... $hopc"
 echo "  hflags ............................... $hflags"
 echo "  etc directory......................... $etcdir"
 echo "  bin directory......................... $bindir"
-echo "  lib directory......................... $libdir"
+echo "  lib directory......................... $libdir/hopsmtp"
 echo "  man directory......................... $mandir"
 echo "  so directory.......................... $sodir"
 

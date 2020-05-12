@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Mon Mar 30 05:52:59 2020 (serrano)                */
+#*    Last change :  Tue Apr 14 09:11:00 2020 (serrano)                */
 #*    Copyright   :  2016-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -64,28 +64,29 @@ do: $(SOFILES) configure.so
 #*    install                                                          */
 #*---------------------------------------------------------------------*/
 install: install-so
-	cp bin/hopsmtp $(BINDIR)/hopsmtp && chmod a+rx $(BINDIR)/hopsmtp
-	cp bin/hopsmtp $(BINDIR)/hopsmtp
-	mkdir -p $(LIBDIR)
-	mkdir -p $(LIBDIR)/$(RELEASE)
-	cp -rf node_modules $(LIBDIR)/$(RELEASE)
-	cp -rf hopsmtp.js $(LIBDIR)/$(RELEASE)
-	cp -rf configure.js $(LIBDIR)/$(RELEASE)
-	chmod a+rx -R $(LIBDIR)
-	find $(LIBDIR) -name '*.so' -exec touch {} \;
+	cp bin/hopsmtp $(DESTDIR)$(BINDIR)/hopsmtp
+	chmod a+rx $(DESTDIR)$(BINDIR)/hopsmtp
+	cp bin/hopsmtp $(DESTDIR)$(BINDIR)/hopsmtp
+	mkdir -p $(DESTDIR)$(LIBDIR)
+	mkdir -p $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	cp -rf node_modules $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	cp -rf hopsmtp.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	cp -rf configure.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	chmod a+rx -R $(DESTDIR)$(LIBDIR)
+	find $(DESTDIR)$(LIBDIR) -name '*.so' -exec touch {} \;
 
 install-so:
-	mkdir -p $(SODIR)
+	mkdir -p $(DESTDIR)$(SODIR)
 	for p in $(OBJECTS:%.js=%) configure; do \
            t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
-	   cp $$p.so $(SODIR)/`basename $$t`; \
+	   cp $$p.so $(DESTDIR)$(SODIR)/`basename $$t`; \
         done
 
 #*---------------------------------------------------------------------*/
 #*    clean                                                            */
 #*---------------------------------------------------------------------*/
 clean:
-	rm -f $(SOFILES)
+	rm -f $(SOFILES) configure.so
 
 cleanall: clean
 	rm -f configure.js

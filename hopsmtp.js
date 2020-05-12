@@ -3,8 +3,8 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Tue Sep  3 10:19:13 2019 (serrano)                */
-/*    Copyright   :  2016-19 Manuel Serrano                            */
+/*    Last change :  Fri Apr 17 07:14:26 2020 (serrano)                */
+/*    Copyright   :  2016-20 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
 /*=====================================================================*/
@@ -191,36 +191,40 @@ function readMessage( stream ) {
    return new Promise( function( resolve, reject ) {
       var msg = "";
       
+      debug( "read message...in promise" );
       stream.on( 'data', data => {
+	 debug( "stream.on ", data );
 	 msg += iconv.decode( data, "latin1" );
       } );
 
       stream.on( 'end', data => {
-	 const sep = msg.match( /(?:\r?\n){2}/ );
+	 try {
+	    debug( "stream.end" );
+	    const sep = msg.match( /(?:\r?\n){2}/ );
 
-	 if( sep ) {
-	    const hd = msg.substring( msg, sep.index );
-	    const to = hd.match( /^[ \t]*To:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
-	    const cc = hd.match( /^[ \t]*cc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
-	    const bcc = hd.match( /^[ \t]*bcc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
-	    const from = hd.match( /^[ \t]*From:[ \t]*([^\r\n]+)/mi );
+	    if( sep ) {
+	       const hd = msg.substring( msg, sep.index );
+	       const hdto = hd.match( /^[ \t]*To:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
+	       const hdcc = hd.match( /^[ \t]*cc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
+	       const hdbcc = hd.match( /^[ \t]*bcc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
+	       const hdfrom = hd.match( /^[ \t]*From:[ \t]*([^\r\n]+)/mi );
 
-	    if( to ) {
-	       let receivers = normalizeEmails( to[ 1 ] );
+	       if( hdto ) {
+	       	  const target = normalizeEmails( hdto[ 1 ] );
+	       	  let to = target;
 
-	       if( cc ) {
-		  const ccs = normalizeEmails( cc[ 1 ] );
-		  receivers = receivers.concat( ccs );
-	       }
+	       	  if( hdcc ) {
+		     to = to.concat( normalizeEmails( hdcc[ 1 ] ) );
+	       	  }
 
-	       if( bcc ) {
-		  const bccs = normalizeEmails( bcc[ 1 ] );
-		  receivers = receivers.concat( bccs );
-	       }
-	       debug( "receivers=", receivers );
+	       	  if( hdbcc ) {
+		     to = to.concat( normalizeEmails( hdbcc[ 1 ] ) );
+	       	  }
+	       	  debug( "to=", to, " target=", target );
 
-	       resolve( { to: receivers,
-			  from: normalizeEmail( from ? from[ 1 ] : args.f ),
+	       	  resolve( { to: to,
+			     target: target,
+			     from: normalizeEmail( hdfrom ? hdfrom[ 1 ] : args.f ),
 			  head: hd,
 			  msg: msg } );
 	    } else {
@@ -229,7 +233,7 @@ function readMessage( stream ) {
 	 } else {
 	    reject( "Cannot find header" );
 	 }
-      } );
+      	 } catch( e ) { #:exception-notify( e ); throw( e ); } }  );
    } );
 }
 
@@ -256,13 +260,14 @@ function sendMessage( config, conn, message ) {
       }
 
       debug( "sending mail to ", message.to );
+
       const buf = iconv.encode( message.msg, "latin1" );
       debug( "encoded ", message.msg.length, " characters" );
-      
+      	 
       message.use8BitMime = true;
-      
+      	 
       conn.send( message, buf, (err, info) => {
-	 			  debug( "sent " + (err ? info : "ok") );
+	 debug( "sent " + (err ? info : "ok") );
 	 if( err == null ) {
 	    logSent( info );
 	    resolve( info );
@@ -348,7 +353,7 @@ function sendRecipientMessageQueue( config, conn, recipient ) {
 	       let p = path.join( config.queue, file.value );
 	       readMessage( fs.createReadStream( p ) )
 		  .then( o => {
-		     if( o.receivers.indexOf( recipient ) ) {
+		     if( o.to.indexOf( recipient ) ) {
 			return sendMessage( config, conn, o )
 			   .then( o => fs.unlinkSync( p ) );
 		     } else {
@@ -431,6 +436,7 @@ function openSMTPConnection( config ) {
 	 + " connection to " + server.host );
       debug( "connecting to " + server.host );
       return new Promise( function( resolve, reject ) {
+      	 debug( "in connecting promise..." );
       	 const conn = new SMTPConnection( server );
       	 conn.on( 'error', reject );
       	 conn.connect( v => conn.login( server.login, () => resolve( conn ) ) );
@@ -522,11 +528,14 @@ function fail( conn, msg, status ) {
 function sendp( config, msg ) {
    
    function immediateDelivery( msg ) {
-      return msg.to.find( function( to ) {
-	 return config.immediateDelivery.indexOf( to.toLowerCase() ) >= 0;
+      debug( "immedia msg=", msg );
+      debug( "immedia msg.target=", msg.target );
+      return msg.target.find( function( tgt ) {
+	 return config.immediateDelivery.indexOf( tgt.toLowerCase() ) >= 0;
       } )
    }
 
+   debug( "sendp msg=", msg );
    if( config.args.os ) {
       debug( "queuing (out-of-mail, command line)" );
       return false;
@@ -681,7 +690,7 @@ open: function( path, mode ) { }
       setQueuing( false );
       exit( false, 0 );
    } 
-	  
+
    if( args.action === "show" || args.bp ) {
       await showQueue( config ); 
       exit( false, 0 );
