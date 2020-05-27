@@ -11,6 +11,17 @@
 #*=====================================================================*/
 
 #*---------------------------------------------------------------------*/
+#*    configure parameters                                             */
+#*---------------------------------------------------------------------*/
+hz=hopsmtp
+version=`grep version package.json | awk '{ print $2 }' | sed 's/[",]//g'`
+license=`grep license package.json | awk '{ print $2 }' | sed 's/[",]//g'`
+date=`date +'%d %B %Y'`
+minor=
+
+license=gpl
+
+#*---------------------------------------------------------------------*/
 #*    User flags                                                       */
 #*---------------------------------------------------------------------*/
 prefix=/usr/local
@@ -23,7 +34,6 @@ hop=hop
 hopc=hopc
 hflags=-O2
 
-version=`grep version package.json | awk '{ print $2 }' | sed 's/[",]//g'`
 main=`grep main package.json | awk '{ print $2 }' | sed 's/[",]//g'`
 
 # environment parsing
