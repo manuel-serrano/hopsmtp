@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Tue Apr 14 09:11:00 2020 (serrano)                */
+#*    Last change :  Sat May  2 08:16:24 2020 (serrano)                */
 #*    Copyright   :  2016-20 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -66,14 +66,13 @@ do: $(SOFILES) configure.so
 install: install-so
 	cp bin/hopsmtp $(DESTDIR)$(BINDIR)/hopsmtp
 	chmod a+rx $(DESTDIR)$(BINDIR)/hopsmtp
-	cp bin/hopsmtp $(DESTDIR)$(BINDIR)/hopsmtp
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	mkdir -p $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf node_modules $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf hopsmtp.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
-	chmod a+rx -R $(DESTDIR)$(LIBDIR)
-	find $(DESTDIR)$(LIBDIR) -name '*.so' -exec touch {} \;
+	chmod -R a+rx $(DESTDIR)$(LIBDIR)
+	find $(DESTDIR)$(SODIR) -name '*.so' -exec touch {} \;
 
 install-so:
 	mkdir -p $(DESTDIR)$(SODIR)
