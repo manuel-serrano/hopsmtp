@@ -296,12 +296,13 @@ function flushMessageQueue( config, conn ) {
 	       debug( "flushing message ", file.value );
 
 	       let p = path.join( config.queue, file.value );
-	       readMessage( fs.createReadStream( p ) )
+	       let s = fs.createReadStream( p );
+	       readMessage( s )
 		  .then( o => sendMessage( config, conn, o ) )
 		  .then( o => fs.unlinkSync( p ) )
 		  .then( sendNextInQueueFile )
 		  .catch( sendNextInQueueFile )
-	          .then( o => fs.close(), o => fs.close() )
+	          .then( o => s.close(), o => s.close() )
 	    } else {
 	       resolve( undefined );
 	    }
@@ -323,10 +324,11 @@ function sendMidMessageQueue( config, conn, mid ) {
 
    if( i ) {
       let p = path.join( config.queue, files[ i ] );
-      return readMessage( fs.createReadStream( p ) )
+      let s = fs.createReadStream( p );
+      return readMessage( s )
 	 .then( o => sendMessage( config, conn, o ) )
 	 .then( o => fs.unlinkSync( p ) )
-	 .then( o => fs.close(), o => fs.close() )
+	 .then( o => s.close(), o => s.close() )
    } else {
       return new Promise( function( resolve, reject ) {
 	 reject( "Not such message \"" + mid + "\"" );
@@ -351,7 +353,8 @@ function sendRecipientMessageQueue( config, conn, recipient ) {
 	       debug( "flushing message ", file.value );
 
 	       let p = path.join( config.queue, file.value );
-	       readMessage( fs.createReadStream( p ) )
+	       let s = fs.createReadStream( p );
+	       readMessage( s )
 		  .then( o => {
 		     if( o.to.indexOf( recipient ) ) {
 			return sendMessage( config, conn, o )
@@ -362,7 +365,7 @@ function sendRecipientMessageQueue( config, conn, recipient ) {
 		  } )
 		  .then( sendNextInQueueFile )
 		  .catch( sendNextInQueueFile )
-		  .then( o => fs.close(), o => fs.close() )
+		  .then( o => s.close(), o => s.close() )
 	    } else {
 	       resolve( undefined );
 	    }
