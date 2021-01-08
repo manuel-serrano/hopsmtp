@@ -4,11 +4,11 @@
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
 /*    Last change :  Fri Apr 17 07:14:26 2020 (serrano)                */
-/*    Copyright   :  2016-20 Manuel Serrano                            */
+/*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
 /*=====================================================================*/
-"use strict";
+"use hopscript";
 
 /*---------------------------------------------------------------------*/
 /*    import                                                           */
@@ -20,16 +20,21 @@ const os = require( 'os' );
 const iconv = require( "iconv-lite" );
 let syslog = require( hop.syslog );
 
+import { loadCDB, findCDB } from "./cdb.js";
+
 /*---------------------------------------------------------------------*/
 /*    constant                                                         */
 /*---------------------------------------------------------------------*/
 const RCbase = "hopsmtp";
+const XSMTPmethodrx = /^[ \t]*X-Message-SMTP-Method:[ \t]*([^\r\n]+)/mi;
 
 /*---------------------------------------------------------------------*/
 /*    Global variables                                                 */
 /*---------------------------------------------------------------------*/
 var config;
+var args;
 var dbg = false;
+var cdb = [];
 
 /*---------------------------------------------------------------------*/
 /*    debug ...                                                        */
@@ -197,7 +202,7 @@ function readMessage( stream ) {
 	 msg += iconv.decode( data, "latin1" );
       } );
 
-      stream.on( 'end', data => {
+      stream.on( 'end', () => {
 	 try {
 	    debug( "stream.end" );
 	    const sep = msg.match( /(?:\r?\n){2}/ );
@@ -208,6 +213,7 @@ function readMessage( stream ) {
 	       const hdcc = hd.match( /^[ \t]*cc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
 	       const hdbcc = hd.match( /^[ \t]*bcc:[ \t]*([^\r\n]+(?:\r?\n[ \t]+[^\r\n]+)*)/mi );
 	       const hdfrom = hd.match( /^[ \t]*From:[ \t]*([^\r\n]+)/mi );
+	       const hdsmtp = hd.match( XSMTPmethodrx );
 
 	       if( hdto ) {
 	       	  const target = normalizeEmails( hdto[ 1 ] );
@@ -225,8 +231,9 @@ function readMessage( stream ) {
 	       	  resolve( { to: to,
 			     target: target,
 			     from: normalizeEmail( hdfrom ? hdfrom[ 1 ] : args.f ),
-			  head: hd,
-			  msg: msg } );
+                             smtp: hdsmtp,
+			     head: hd,
+			     msg: msg } );
 	    } else {
 	       reject( "Cannot find destination address" );
 	    }
@@ -259,8 +266,12 @@ function sendMessage( config, conn, message ) {
 		     + err.toString() );
       }
 
-      debug( "sending mail to ", message.to );
+      debug( "sending mail to ", message.to, message.smtp );
 
+      const contact = findCDB( cdb, message.to );
+
+/*       console.log( "contact=", contact, message.smtp );             */
+      
       const buf = iconv.encode( message.msg, "latin1" );
       debug( "encoded ", message.msg.length, " characters" );
       	 
@@ -442,7 +453,7 @@ function openSMTPConnection( config ) {
       	 debug( "in connecting promise..." );
       	 const conn = new SMTPConnection( server );
       	 conn.on( 'error', reject );
-      	 conn.connect( v => conn.login( server.login, () => resolve( conn ) ) );
+      	 conn.connect( () => conn.login( server.login, (a = undefined, b = undefined) => resolve( conn ) ) );
       } );
    }
    
@@ -586,12 +597,12 @@ function onSmtpConnect( config, conn ) {
       }
    } else if( config.args.M ) {
       debug( "sending from queue MID=" + config.args.M );
-      sendMidMessageQueue( config, conn, config.args.M, false )
+      sendMidMessageQueue( config, conn, config.args.M )
 	 .then( o => exit( conn, 0 ) )
 	 .catch( o => fail( conn, o, 1 ) );
    } else if( config.args.R ) {
       debug( "sending from queue RECIPIENT=" + config.args.R );
-      sendRecipientMessageQueue( config, conn, false, config.args.R )
+      sendRecipientMessageQueue( config, conn, config.args.R )
 	 .then( o => exit( conn, 0 ) )
 	 .catch( o => fail( conn, o, 1 ) );
    } else {
@@ -641,7 +652,7 @@ function onSmtpError( config, err ) {
 async function main() {
    const argv = process.argv.slice( hop.standalone ? 1 : 2 );
    const minimist = require( 'minimist' );
-   const args = minimist( argv, { names: ["-oi", "-bp", "-oQ", "-os"] });
+   args = minimist( argv, { names: ["-oi", "-bp", "-oQ", "-os"] });
 
    if( args.h || args.help ) {
       console.log( "hopsmpt v" + require( "./configure.js" ).version );
@@ -655,9 +666,11 @@ async function main() {
       console.log( "  -oQdir     Select the queue directory" );
       console.log( "  -os        Enqueue message" );
       console.log( "  -q         Process the queue" );
+      console.log( "  -f         sender address" );
       console.log( "  -wq        Process the queue only if in work period" );
       console.log( "  -t         Read message, searching for recipients" );
       console.log( "  --force    Force sending immediately" );
+      console.log( "  --nocdb    Do not load contact database" );
       console.log( "  -g         Internal debug" );
       process.exit( 0 );
    }
@@ -677,15 +690,20 @@ async function main() {
       }
       syslog = {
 	 log: function( ...args ) { debug.apply( undefined, args ) },
-LOG_INFO: "info: ",
-LOG_ERROR: "error: ",
-open: function( path, mode ) { }
+         LOG_INFO: "info: ",
+	 LOG_ERROR: "error: ",
+	 open: function( path, mode ) { }
       }
    }
    if( args.oQ ) {
       config.queue = args.oQ;
    }
-
+   
+   if( !args.nocdb && config.contacts ) {
+      // load the contact database
+      cdb = loadCDB( config.contacts );
+   }
+   
    if( args.queue === "on" ) {
       setQueuing( true );
       exit( false, 0 );

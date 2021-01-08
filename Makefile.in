@@ -4,7 +4,7 @@
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
 #*    Last change :  Sat May  2 08:16:24 2020 (serrano)                */
-#*    Copyright   :  2016-20 Manuel Serrano                            */
+#*    Copyright   :  2016-21 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
 #*=====================================================================*/
@@ -30,7 +30,7 @@ SMTPSHARED = node_modules/nodemailer-shared/lib/shared.js \
   node_modules/httpntlm/ntlm.js
 SMTP = $(SMTPLIB) $(SMTPSHARED)
 
-OBJECTS = hopsmtp.js \
+OBJECTS = hopsmtp.js cdb.js \
   $(ICONV:%=node_modules/iconv-lite/%) \
   $(MINIMIST:%=node_modules/minimist/%) \
   $(SMTP:%=node_modules/smtp-connection/%)
@@ -70,6 +70,7 @@ install: install-so
 	mkdir -p $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf node_modules $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf hopsmtp.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	cp -rf cdb.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	chmod -R a+rx $(DESTDIR)$(LIBDIR)
 	find $(DESTDIR)$(SODIR) -name '*.so' -exec touch {} \;
