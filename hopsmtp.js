@@ -187,6 +187,11 @@ function findSMTPServers( config, message ) {
 /*    message "from" or "reply-to" fields.                             */
 /*---------------------------------------------------------------------*/
 function findMessageServers( config, message ) {
+   
+   function regexi( str ) {
+      return new RegExp( str, "i" );
+   }
+   
    if( message.smtp ) {
       return findSMTPServers( config, message );
    } else {
@@ -199,7 +204,7 @@ function findMessageServers( config, message ) {
       
       // first traversal, servers that match replyto
       const positive = config.servers.filter( 
-      	 s => s[ "reply-to" ] && replyto.match( s[ "reply-to" ] ) );
+      	 s => s[ "reply-to" ] && replyto.match( regexi( s[ "reply-to" ] ) ) );
       
       if( positive.length >= 1 ) { 
       	 return positive;
@@ -207,7 +212,7 @@ function findMessageServers( config, message ) {
       
       // second traversla, generics and those that match
       return config.servers.filter( 
-      	 s => !s[ "reply-to" ] || replyto.match( s[ "reply-to" ] ) );
+      	 s => !s[ "reply-to" ] || replyto.match( regexi( s[ "reply-to" ] ) ) );
    }
 }
 
