@@ -21,6 +21,7 @@ const iconv = require( "iconv-lite" );
 let syslog = require( hop.syslog );
 
 import { loadCDB, findCDB } from "./cdb.js";
+import { system, systemSync } from hop.system;
 
 /*---------------------------------------------------------------------*/
 /*    constant                                                         */
@@ -319,6 +320,34 @@ function readMessage( stream ) {
 }
 
 /*---------------------------------------------------------------------*/
+/*    login ...                                                        */
+/*---------------------------------------------------------------------*/
+function login( server ) {
+   if( !("login" in server) ) {
+      return Promise.resolve( undefined );
+   } else {
+      const lg = server.login;
+      
+      if( "pass" in lg ) {
+      	 return Promise.resolve( lg );
+      } else if( "command" in lg ) {
+	 const key = lg.command
+		  .replace( /%h/g, server.host )
+	          .replace( /%p/g, server.port )
+	          .replace( /%u/g, lg.user );
+	    
+      	 return system( key )
+	    .then( passwd => {
+	       	      lg.pass = passwd.trim();
+	       	      return lg;
+	    	   } );
+      } else {
+      	 return Promise.reject( "Unknown login method" );
+      }
+   }
+}
+
+/*---------------------------------------------------------------------*/
 /*    openMessageConnection ...                                        */
 /*---------------------------------------------------------------------*/
 function openMessageConnection( msg, servers ) {
@@ -333,7 +362,14 @@ function openMessageConnection( msg, servers ) {
       return new Promise( function( resolve, reject ) {
       	 const conn = new SMTPConnection( server );
       	 conn.on( 'error', reject );
-      	 conn.connect( () => conn.login( server.login, (a = undefined, b = undefined) => resolve( conn ) ) );
+	 login( server )
+	    .then( login => 
+	       conn.connect( () => conn.login( login, (a = undefined, b = undefined) => resolve( conn ) ) ) )
+	    .catch( err => {
+		   debug( "cannot authenticate" );
+		   syslog.log( syslog.LOG_ERROR, `Cannot authenticate to ${server.host}:${server.port} -- ${err.toString()}` );
+		   reject( "cannot authenticate" );
+		} )
       } );
    }
    
@@ -413,7 +449,7 @@ function sendStmpMessage( config, message ) {
 /*---------------------------------------------------------------------*/
 /*    flushMessageQueue ...                                            */
 /*---------------------------------------------------------------------*/
-function flushMessageQueue( config, immediate ) {
+function flushMessageQueue( config ) {
    return new Promise( function( resolve, reject ) {
       if( fs.existsSync( config.queue ) && fs.statSync( config.queue ).isDirectory() ) {
 	 var iterator = (function *generator() {
@@ -429,7 +465,7 @@ function flushMessageQueue( config, immediate ) {
 	       let p = path.join( config.queue, file.value );
 	       let s = fs.createReadStream( p );
 	       readMessage( s )
-		  .then( o => sendOrQueue( config, o, immediate ) )
+		  .then( o => sendOrQueue( config, o, true ) )
 		  .then( o => fs.unlinkSync( p ) )
 		  .then( sendNextInQueueFile )
 		  .catch( sendNextInQueueFile )
@@ -654,7 +690,7 @@ function sendOrQueue( config, msg, immediate ) {
       	 
 	 return openMessageConnection( msg, servers )
 	    .then( conn => conn.sendMessage( config, msg ) )
-	    .then( o => { if( !immediate ) return flushMessageQueue( config, immediate ) } )
+	    .then( o => { if( !immediate ) return flushMessageQueue( config ) } )
 	    .catch( err => {
   consolo.log( "ERR=",err );
 messageQueue( config, msg );
@@ -716,6 +752,7 @@ async function main() {
 	 LOG_ERROR: "error: ",
 	 open: function( path, mode ) { }
       }
+      console.error( "logging message to \"/tmp/hopsmt.log\"" );
    }
    if( args.oQ ) {
       config.queue = args.oQ;
@@ -740,13 +777,13 @@ async function main() {
       exit( 0 );
    } else if( config.args.q ) {
       debug( "process the queue" );
-      flushMessageQueue( config, true )
+      flushMessageQueue( config )
 	 .then( o => exit( 0 ) )
 	 .catch( o => fail( o, 1 ) );
    } else if( config.args.wq ) {
       debug( "process the queue unless out-of-mail" );
       if( sendp( config, undefined ) ) {
-	 flushMessageQueue( config, true )
+	 flushMessageQueue( config )
 	    .then( o => exit( 0 ) )
 	    .catch( o => fail( o, 1 ) );
       }
