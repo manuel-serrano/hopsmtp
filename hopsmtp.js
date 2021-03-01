@@ -692,9 +692,9 @@ function sendOrQueue( config, msg, immediate ) {
 	    .then( conn => conn.sendMessage( config, msg ) )
 	    .then( o => { if( !immediate ) return flushMessageQueue( config ) } )
 	    .catch( err => {
-  consolo.log( "ERR=",err );
-messageQueue( config, msg );
-	     	    })
+   		   console.log( "ERR=",err );
+		   messageQueue( config, msg );
+		})
       }
    } else {
       debug( "message queued [" + msg.msg.length + "]" );
