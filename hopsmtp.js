@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Fri Apr 17 07:14:26 2020 (serrano)                */
+/*    Last change :  Thu Apr  1 19:30:38 2021 (serrano)                */
 /*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -692,7 +692,6 @@ function sendOrQueue( config, msg, immediate ) {
 	    .then( conn => conn.sendMessage( config, msg ) )
 	    .then( o => { if( !immediate ) return flushMessageQueue( config ) } )
 	    .catch( err => {
-   		   console.log( "ERR=",err );
 		   messageQueue( config, msg );
 		})
       }
