@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu Apr  1 19:30:38 2021 (serrano)                */
+/*    Last change :  Sun Apr 18 18:02:39 2021 (serrano)                */
 /*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -338,7 +338,7 @@ function login( server ) {
 	    
       	 return system( key )
 	    .then( passwd => {
-	       	      lg.pass = passwd.trim();
+	       	      lg.pass = passwd.replace( /[ ]*\n.*/g, "" );
 	       	      return lg;
 	    	   } );
       } else {
@@ -432,8 +432,8 @@ function sendStmpMessage( config, message ) {
       
       message.use8BitMime = true;
       
-      conn.send( message, buf, (err, info) => {
-	 debug( "sent " + (err ? info : "ok") );
+      conn.send( message, buf, (err, info = false) => {
+	 debug( "sent " + (err ? (info || err): "ok") );
 	 conn.quit();
 	 if( err === null ) {
 	    logSent( conn, info );
