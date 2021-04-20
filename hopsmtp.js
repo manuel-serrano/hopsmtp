@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Sun Apr 18 18:02:39 2021 (serrano)                */
+/*    Last change :  Tue Apr 20 08:20:07 2021 (serrano)                */
 /*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -338,7 +338,7 @@ function login( server ) {
 	    
       	 return system( key )
 	    .then( passwd => {
-	       	      lg.pass = passwd.replace( /[ ]*\n.*/g, "" );
+	       	      lg.pass = passwd.replace( /[ ]*\n.*/g, "" ).trim();
 	       	      return lg;
 	    	   } );
       } else {
