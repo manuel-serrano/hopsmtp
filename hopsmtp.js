@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Tue Apr 20 08:20:07 2021 (serrano)                */
+/*    Last change :  Thu May  6 10:46:00 2021 (serrano)                */
 /*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -32,10 +32,10 @@ const XSMTPmethodrx = /^[ \t]*X-Message-SMTP-Method:[ \t]*([^\r\n]+)/mi;
 /*---------------------------------------------------------------------*/
 /*    Global variables                                                 */
 /*---------------------------------------------------------------------*/
-var config;
-var args;
-var dbg = false;
-var cdb = [];
+let config;
+let args;
+let dbg = false;
+let cdb = [];
 
 /*---------------------------------------------------------------------*/
 /*    debug ...                                                        */
@@ -174,7 +174,7 @@ function findSMTPServers( config, message ) {
       const port = smtp[ 3 ] ? parseInt( smtp[ 3 ] ) : -1;
       
       return config.servers.filter( 
-	 s => (!s.method || (s.method === stmp[ 1 ]))
+	 s => (!s.method || (s.method === smtp[ 1 ]))
 	    && s.host === smtp[ 2 ]
 	    && (port === -1 || port === s.port) );
    }
@@ -223,7 +223,7 @@ function findMessageServers( config, message ) {
 function setQueuing( val ) {
    const home = process.env.HOME;
    const st = path.join( home, ".config", "hop", "hopsmtp", "state.json" );
-   var fd = fs.openSync( st, "w" );
+   const fd = fs.openSync( st, "w" );
    fs.writeSync( fd, '{ "outOfMail": ' + val + ' }' );
    fs.closeSync( fd );
 }
@@ -270,7 +270,7 @@ function readMessage( stream ) {
    }
 
    return new Promise( function( resolve, reject ) {
-      var msg = "";
+      let msg = "";
       
       debug( "read message...in promise" );
       stream.on( 'data', data => {
@@ -295,11 +295,15 @@ function readMessage( stream ) {
 	       	  let to = target;
 
 	       	  if( hdcc ) {
-		     to = to.concat( normalizeEmails( hdcc[ 1 ] ) );
+		     const cctgt = normalizeEmails( hdcc[ 1 ] );
+		     
+		     if( cctgt != "" ) to = to.concat( cctgt );
 	       	  }
 
 	       	  if( hdbcc ) {
-		     to = to.concat( normalizeEmails( hdbcc[ 1 ] ) );
+		     const bcctgt = normalizeEmails( hdbcc[ 1 ] );
+
+		     if( bcctgt != "" ) to = to.concat( bcctgt );
 	       	  }
 
 	       	  resolve( { to: to,
@@ -452,12 +456,12 @@ function sendStmpMessage( config, message ) {
 function flushMessageQueue( config ) {
    return new Promise( function( resolve, reject ) {
       if( fs.existsSync( config.queue ) && fs.statSync( config.queue ).isDirectory() ) {
-	 var iterator = (function *generator() {
-	    yield * fs.readdirSync( config.queue );
-	 })();
+	 const iterator = (function *generator() {
+           yield * fs.readdirSync( config.queue );
+         })();
 
 	 function sendNextInQueueFile() {
-	    var file = iterator.next();
+	    const file = iterator.next();
 
 	    if( !file.done ) {
 	       debug( "flushing message ", file.value );
@@ -469,7 +473,7 @@ function flushMessageQueue( config ) {
 		  .then( o => fs.unlinkSync( p ) )
 		  .then( sendNextInQueueFile )
 		  .catch( sendNextInQueueFile )
-	          .then( o => s.close(), o => s.close() )
+		  .then( o => s.close(), o => s.close() )
 	    } else {
 	       resolve( undefined );
 	    }
@@ -509,12 +513,12 @@ function sendMidMessageQueue( config, mid ) {
 function sendRecipientMessageQueue( config, conn, recipient ) {
    return new Promise( function( resolve, reject ) {
       if( fs.existsSync( config.queue ) && fs.statSync( config.queue ).isDirectory() ) {
-	 var iterator = (function *generator() {
+	 const iterator = (function *generator() {
 	    yield * fs.readdirSync( config.queue );
 	 })();
 
 	 function sendNextInQueueFile() {
-	    var file = iterator.next();
+	    const file = iterator.next();
 
 	    if( !file.done ) {
 	       debug( "flushing message ", file.value );
@@ -551,11 +555,11 @@ function sendRecipientMessageQueue( config, conn, recipient ) {
 function makeDirectories( dir ) {
    if( fs.existsSync( dir ) ) {
       if( !fs.statSync( dir ).isDirectory() ) {
-	 throw "Not a directory \"" + parent + "\"";
+	 throw "Not a directory \"" + dir + "\"";
       }
       return;
    }
-   var parent = path.dirname( dir );
+   const parent = path.dirname( dir );
 
    if( !fs.existsSync( parent ) ) makeDirectories( parent );
    if( !fs.statSync( parent ).isDirectory() ) {
@@ -678,11 +682,10 @@ function sendOrQueue( config, msg, immediate ) {
       
       if( !servers ) {
       	 debug( "no servers for message" );
-      	 syslog.log( syslog.LOG_ERROR, "No suitable server message for " + message.from
+      	 syslog.log( syslog.LOG_ERROR, "No suitable server message for " + msg.from
 + " uid=" + process.getuid()
 + " username=" + (process.env.USERNAME || process.env.LOGNAME)
-+ " outbytes=" + message.msg.length
-+ err.toString() );
++ " outbytes=" + msg.msg.length );
 	 
       	 return Promise.reject( "No suitable server" );
       } else {
@@ -732,9 +735,9 @@ async function main() {
       process.exit( 0 );
    }
 
-   var config = loadConfig( args );
-   var rc = loadRC();
-   var state = loadState();
+   const config = loadConfig( args );
+   const rc = loadRC();
+   const state = loadState();
 
    config.args = args;
    config.rc = rc;

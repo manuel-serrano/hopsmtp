@@ -4,12 +4,16 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Oct  1 17:03:18 2016                          */
-#*    Last change :  Fri Apr 10 15:02:08 2020 (serrano)                */
-#*    Copyright   :  2016-20 Manuel Serrano                            */
+#*    Last change :  Thu May  6 10:51:03 2021 (serrano)                */
+#*    Copyright   :  2016-21 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSMTP, sendmail replacement.                                   */
 #*=====================================================================*/
 
 #hop -g -q --no-server --so-dir @LIBDIR@/@RELEASE@/so -- @LIBDIR@/@RELEASE@/@MAIN@ -g $*
 #hop --sofile-policy nte1 -q --no-server --so-dir /tmp/$USER/cache/hop/0 -- @LIBDIR@/@RELEASE@/@MAIN@ $*
-hop --no-zeroconf --so-policy nte1 -q --no-server --so-dir @SODIR@ -- @LIBDIR@/@RELEASE@/@MAIN@ $*
+if [ "$HOPTRACE" = "hopsmtp:debug " ]; then
+   hop --no-zeroconf --so-policy no --no-so -g -q --no-server -- @LIBDIR@/@RELEASE@/@MAIN@ $*
+else
+  hop --no-zeroconf --so-policy nte1 -q --no-server --so-dir @SODIR@ -- @LIBDIR@/@RELEASE@/@MAIN@ $*
+fi
