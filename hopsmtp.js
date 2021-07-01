@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu May  6 10:46:00 2021 (serrano)                */
+/*    Last change :  Thu Jun 17 19:14:56 2021 (serrano)                */
 /*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -754,7 +754,7 @@ async function main() {
 	 LOG_ERROR: "error: ",
 	 open: function( path, mode ) { }
       }
-      console.error( "logging message to \"/tmp/hopsmt.log\"" );
+      console.error( "logging message to \"/tmp/hopsmtp.log\"" );
    }
    if( args.oQ ) {
       config.queue = args.oQ;
