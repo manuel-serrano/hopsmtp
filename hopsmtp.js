@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu Jun 17 19:14:56 2021 (serrano)                */
+/*    Last change :  Tue Oct 12 15:24:15 2021 (serrano)                */
 /*    Copyright   :  2016-21 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -394,7 +394,7 @@ function openMessageConnection( msg, servers ) {
 	    },
 	       err => {
    		  debug( "connection failed: ", server + " " + err.toString() );
-		  syslog.log( syslog.LOG_ERROR, "Cannot connect: " + err.toString() );
+		  syslog.log( syslog.LOG_ERROR, "Cannot connect to server \"" + server.host + ":" + server.port + "\": " + err.toString() );
    		  loop( resolve, reject, i + 1 );
 	       } )
       }
