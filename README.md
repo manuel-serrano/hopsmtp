@@ -23,7 +23,7 @@ gdb `which hop`
 ```
 
 ```gdb
-(gdb) run --no-zeroconf --so-policy nte1 -q --no-server --so-dir /usr/local/lib/hopsmtp/0.2.1/so/hop/3.3.0/6c3b8c5f87009dc7ebfbfe534acb1c65/linux-x86_64 -- /usr/local/lib/hopsmtp/0.2.1/hopsmtp.js -t < mail.example
+(gdb) run --no-zeroconf --so-policy nte1 -q --no-server --so-dir /usr/local/lib/hopsmtp/0.4.2/so/hop/3.5.0/2b382a5d0fe4c645d55e512fa8c5cee4/linux-x86_64 -- /usr/local/lib/hopsmtp/0.4.2/hopsmtp.js -t < mail.example
 ```
   
 or

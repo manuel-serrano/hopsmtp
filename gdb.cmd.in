@@ -1,0 +1,1 @@
+run --no-zeroconf --so-policy nte1 -q --no-server --so-dir @SODIR@ -- /usr/local/lib/hopsmtp/@RELEASE@/hopsmtp.js -t < mail.example
