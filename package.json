@@ -5,5 +5,5 @@
    "license": "gpl",
    "author": { "name": "Manuel Serrano" },
    "main": "hopsmtp.js",
-   "engines": { "hop": ">=3.4.0" },
+   "engines": { "hop": ">=3.4.0" }
 }
