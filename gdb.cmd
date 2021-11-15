@@ -1,1 +1,0 @@
-run --no-zeroconf --so-policy nte1 -q --no-server --so-dir /usr/local/lib/hopsmtp/0.4.2/so/hop/3.5.0/8842a831120d19d4c0c032bd68d115ce/linux-x86_64 -- /usr/local/lib/hopsmtp/0.4.2/hopsmtp.js -t < mail.example
