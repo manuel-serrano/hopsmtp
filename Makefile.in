@@ -3,8 +3,8 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Sat May  2 08:16:24 2020 (serrano)                */
-#*    Copyright   :  2016-21 Manuel Serrano                            */
+#*    Last change :  Tue Feb 22 07:59:41 2022 (serrano)                */
+#*    Copyright   :  2016-22 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
 #*=====================================================================*/
@@ -81,6 +81,10 @@ install-so:
            t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
 	   cp $$p.so $(DESTDIR)$(SODIR)/`basename $$t`; \
         done
+
+uninstall:
+	rm -rf $(DESTDIR)$(LIBDIR)
+	rm -rf $(DESTDIR)$(BINDIR)/hopsmtp
 
 #*---------------------------------------------------------------------*/
 #*    clean                                                            */
