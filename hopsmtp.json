@@ -1,14 +1,59 @@
 {
-   "port": 587,
-   "host": "mail2-relais-roc.national.inria.fr",
-   "requireTLS": true,
-   "authMethod": "LOGIN",
    "name": "host.domain.fr",
    
-   "login": {
-      "user": "XXXX",
-      "pass": "YYYY"
-   },
+   "servers": [ 
+      {
+         "port": 587,
+         "host": "smtp.glop.fr",
+         "requireTLS": true,
+         "authMethod": "LOGIN",
+         "login": {
+            "user": "LOGIN",
+            "command": "pass ldap"
+         }
+      },
+      {
+         "port": 25,
+         "host": "smtp.glop.fr",
+      },
+      {
+         "reply-to": "foo.bar@gee.fr",
+         "port": 587,
+         "host": "smtp.laposte.net",
+         "requireTLS": true,
+         "authMethod": "LOGIN",
+         "tls": { "rejectUnauthorized": false },
+         "login": {
+            "user": "foo.bar@laposte.net",
+            "command": "pass laposte"
+         }
+      },
+      {
+         "reply-to": "foo.bar@laposte.net",
+         "port": 465,
+         "host": "smtp.laposte.net",
+         "secure": true,
+         "requireTLS": true,
+         "authMethod": "LOGIN",
+         "tls": { "rejectUnauthorized": false },
+         "logger": true,
+         "debug": true,
+         "login": {
+            "user": "Foo Bar",
+            "command": "pass email/laposte"
+         }
+      },
+      {
+         "port": 587,
+         "host": "smtp.gmail.com",
+         "requireTLS": true,
+         "authMethod": "LOGIN",
+         "login": {
+            "user": "foo.bar@gmail.com",
+            "command": "pass gmail"
+         }
+      }
+   ],
 
    "outOfMail": {
       "hours": [ [20, 24], [0, 8] ],
