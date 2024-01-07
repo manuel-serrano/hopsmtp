@@ -3,8 +3,8 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Tue Feb 22 07:59:41 2022 (serrano)                */
-#*    Copyright   :  2016-22 Manuel Serrano                            */
+#*    Last change :  Wed Apr 26 11:53:58 2023 (serrano)                */
+#*    Copyright   :  2016-23 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
 #*=====================================================================*/
@@ -39,8 +39,6 @@ SOFILES = $(OBJECTS:%.js=%.so)
 
 SODIR= @SODIR@
 JSDIR = $(LIBDIR)/$(RELEASE)
-
-SO=$(SOFILES:%=so/%)
 
 #*---------------------------------------------------------------------*/
 #*    do:                                                              */
