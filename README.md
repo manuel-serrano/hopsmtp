@@ -13,6 +13,12 @@ bin/hopsmtp -t < mail.example
 To debug if something goes wrong with compiled files:
 
 ```shell
+HOPTRACE=hopsmtp:debug bin/hopsmtp -t < mail.example
+```
+
+and 
+
+```shell
 sh -x bin/hopsmtp -t < mail.example
 ```
 
