@@ -1,10 +1,10 @@
 #*=====================================================================*/
-#*    serrano/prgm/utils/hopsmtp/Makefile.in                           */
+#*    serrano/prgm/utils/hopsmtp/Makefile                              */
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Wed Apr 26 11:53:58 2023 (serrano)                */
-#*    Copyright   :  2016-23 Manuel Serrano                            */
+#*    Last change :  Wed May 29 08:50:10 2024 (serrano)                */
+#*    Copyright   :  2016-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
 #*=====================================================================*/
@@ -44,7 +44,7 @@ JSDIR = $(LIBDIR)/$(RELEASE)
 #*    do:                                                              */
 #*---------------------------------------------------------------------*/
 do: $(SOFILES) configure.so
-	echo $(SMTP)
+	@echo "hopsmtp ready."
 
 #*---------------------------------------------------------------------*/
 #*    .suffixes                                                        */
@@ -70,13 +70,18 @@ install: install-so
 	cp -rf hopsmtp.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf cdb.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	cp -rf package.json $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	chmod -R a+rx $(DESTDIR)$(LIBDIR)
 	find $(DESTDIR)$(SODIR) -name '*.so' -exec touch {} \;
+	chmod a-x $(OBJECTS:%=$(DESTDIR)$(LIBDIR)/$(RELEASE)/%)
+	chmod a-x $(DESTDIR)$(LIBDIR)/$(RELEASE)/configure.js
+	chmod a-x $(DESTDIR)$(LIBDIR)/$(RELEASE)/package.json
+	chmod -R a+rx $(DESTDIR)$(LIBDIR)/$(RELEASE)/so
 
 install-so:
 	mkdir -p $(DESTDIR)$(SODIR)
 	for p in $(OBJECTS:%.js=%) configure; do \
-           t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-path \"$(JSDIR)/$$p.js\")))"`; \
+           t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-cache-path \"$(DESTDIR)$(JSDIR)/$$p.js\" :root \"$(DESTDIR)$(LIBDIR)/$(RELEASE)\")))"`; \
 	   cp $$p.so $(DESTDIR)$(SODIR)/`basename $$t`; \
         done
 
