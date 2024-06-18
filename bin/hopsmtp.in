@@ -4,14 +4,12 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Oct  1 17:03:18 2016                          */
-#*    Last change :  Wed May 29 08:51:26 2024 (serrano)                */
+#*    Last change :  Tue Jun 18 10:29:07 2024 (serrano)                */
 #*    Copyright   :  2016-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSMTP, sendmail replacement.                                   */
 #*=====================================================================*/
 
-#hop -g -q --no-server --so-dir @LIBDIR@/@RELEASE@/so -- @LIBDIR@/@RELEASE@/@MAIN@ -g $*
-#hop --sofile-policy nte1 -q --no-server --so-dir /tmp/$USER/cache/hop/0 -- @LIBDIR@/@RELEASE@/@MAIN@ $*
 if [ "$HOPTRACE" = "hopsmtp:debug" ]; then
    hopjs -g @LIBDIR@/@RELEASE@/@MAIN@ $*
 else

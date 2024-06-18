@@ -1,9 +1,9 @@
 #*=====================================================================*/
-#*    serrano/prgm/utils/hopsmtp/Makefile                              */
+#*    serrano/prgm/utils/hopsmtp/Makefile.in                           */
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Wed May 29 08:50:10 2024 (serrano)                */
+#*    Last change :  Tue Jun 18 08:19:51 2024 (serrano)                */
 #*    Copyright   :  2016-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -11,6 +11,8 @@
 BINDIR=@BINDIR@
 LIBDIR=@LIBDIR@
 RELEASE=@RELEASE@
+
+HOPSODIR=@SODIR@
 
 HOP = @HOP@
 HOPC = @HOPC@
@@ -20,22 +22,47 @@ ICONVLIB = index.js streams.js bom-handling.js extend-node.js
 ICONVENC = dbcs-codec.js index.js sbcs-codec.js sbcs-data.js utf16.js \
   dbcs-data.js internal.js sbcs-data-generated.js utf7.js
 ICONV = $(ICONVLIB:%=lib/%) $(ICONVENC:%=encodings/%)
+ICONVSO = $(ICONVLIB:%.js=lib/$(HOPSODIR)/%.so) \
+  $(ICONVENC:%.js=encodings/$(HOPSODIR)/%.so)
 
 MINIMIST = index.js
+MINIMISTSO = $(MINIMIST:%.js=$(HOPSODIR)/%.so)
 
-SMTPLIB = lib/data-stream.js lib/smtp-connection.js 
-SMTPSHARED = node_modules/nodemailer-shared/lib/shared.js \
-  node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib/cookies.js \
-  node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib/fetch.js \
-  node_modules/httpntlm/ntlm.js
-SMTP = $(SMTPLIB) $(SMTPSHARED)
+SMTPJSFILES = data-stream.js smtp-connection.js 
+SMTPLIBDIR = lib
+SMTPLIB = $(SMTPJSFILES:%=$(SMTPLIBDIR)/%)
+SMTPLIBSO = $(SMTPJSFILES:%.js=$(SMTPLIBDIR)/$(HOPSODIR)/%.so)
 
-OBJECTS = hopsmtp.js cdb.js \
+SMTPSHAREDLIBFILES = shared.js
+SMTPSHAREDLIBDIR = node_modules/nodemailer-shared/lib
+SMTPSHAREDLIB = $(SMTPSHAREDLIBFILES:%=$(SMTPSHAREDLIBDIR)/%)
+SMTPSHAREDLIBSO = $(SMTPSHAREDLIBFILES:%.js=$(SMTPSHAREDLIBDIR)/$(HOPSODIR)/%.so)
+
+SMTPSHAREDFETCHFILES = cookies.js fetch.js
+SMTPSHAREDFETCHDIR = node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib
+SMTPSHAREDFETCH = $(SMTPSHAREDFETCHFILES:%=$(SMTPSHAREDFETCHDIR)/%)
+SMTPSHAREDFETCHSO = $(SMTPSHAREDFETCHFILES:%.js=$(SMTPSHAREDFETCHDIR)/$(HOPSODIR)/%.so)
+
+SMTPHTTPNTLMFILES = ntlm.js
+SMTPHTTPNTLMDIR = node_modules/httpntlm
+SMTPHTTPNTLM = $(SMTPHTTPNTLMFILES:%=$(SMTPHTTPNTLMDIR)/%)
+SMTPHTTPNTLMSO = $(SMTPHTTPNTLMFILES:%.js=$(SMTPHTTPNTLMDIR)/$(HOPSODIR)/%.so)
+
+SMTP = $(SMTPLIB) $(SMTPSHAREDLIB) $(SMTPSHAREDFETCH) $(SMTPHTTPNTLM)
+SMTPSO = $(SMTPLIBSO) $(SMTPSHAREDLIBSO) $(SMTPSHAREDFETCHSO) $(SMTPHTTPNTLMSO)
+
+HOPSMTP = hopsmtp.js cdb.js
+HOPSMTPSO = $(HOPSMTP:%.js=$(HOPSODIR)/%.so)
+
+SOURCES = $(HOPSMTP) \
   $(ICONV:%=node_modules/iconv-lite/%) \
   $(MINIMIST:%=node_modules/minimist/%) \
   $(SMTP:%=node_modules/smtp-connection/%)
 
-SOFILES = $(OBJECTS:%.js=%.so)
+SOFILES = $(HOPSMTPSO) \
+  $(ICONVSO:%=node_modules/iconv-lite/%) \
+  $(MINIMISTSO:%=node_modules/minimist/%) \
+  $(SMTPSO:%=node_modules/smtp-connection/%)
 
 SODIR= @SODIR@
 JSDIR = $(LIBDIR)/$(RELEASE)
@@ -43,7 +70,7 @@ JSDIR = $(LIBDIR)/$(RELEASE)
 #*---------------------------------------------------------------------*/
 #*    do:                                                              */
 #*---------------------------------------------------------------------*/
-do: $(SOFILES) configure.so
+do: $(SOFILES) $(HOPSODIR)/configure.so
 	@echo "hopsmtp ready."
 
 #*---------------------------------------------------------------------*/
@@ -55,45 +82,46 @@ do: $(SOFILES) configure.so
 #*---------------------------------------------------------------------*/
 #*    The implicit rules                                               */
 #*---------------------------------------------------------------------*/
-%.so: %.js
-	$(HOPC) $(HFLAGS) -y -o $@ $< 
+%.so: ../../../../%.js
+	$(HOPC) $(HFLAGS) -y -o $@ $<
 
 #*---------------------------------------------------------------------*/
 #*    install                                                          */
 #*---------------------------------------------------------------------*/
-install: install-so
+install:
+	# binary file
 	cp bin/hopsmtp $(DESTDIR)$(BINDIR)/hopsmtp
 	chmod a+rx $(DESTDIR)$(BINDIR)/hopsmtp
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	mkdir -p $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	# package.json
+	cp package.json $(DESTDIR)$(LIBDIR)/$(RELEASE)/
+	# sources and so files
+	cp -r so $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf node_modules $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf hopsmtp.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf cdb.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf package.json $(DESTDIR)$(LIBDIR)/$(RELEASE)
-	chmod -R a+rx $(DESTDIR)$(LIBDIR)
-	find $(DESTDIR)$(SODIR) -name '*.so' -exec touch {} \;
-	chmod a-x $(OBJECTS:%=$(DESTDIR)$(LIBDIR)/$(RELEASE)/%)
-	chmod a-x $(DESTDIR)$(LIBDIR)/$(RELEASE)/configure.js
-	chmod a-x $(DESTDIR)$(LIBDIR)/$(RELEASE)/package.json
-	chmod -R a+rx $(DESTDIR)$(LIBDIR)/$(RELEASE)/so
-
-install-so:
-	mkdir -p $(DESTDIR)$(SODIR)
-	for p in $(OBJECTS:%.js=%) configure; do \
-           t=`$(HOP) --no-zeroconf --no-server --eval "(print (basename (hop-sofile-cache-path \"$(DESTDIR)$(JSDIR)/$$p.js\" :root \"$(DESTDIR)$(LIBDIR)/$(RELEASE)\")))"`; \
-	   cp $$p.so $(DESTDIR)$(SODIR)/`basename $$t`; \
-        done
+	find $(DESTDIR)$(SODIR) -name 'package.json' -exec chmod a+r {} \;
+	# permissions
+	chmod a+rx $(DESTDIR)$(LIBDIR)/
+	chmod a+rx -R $(DESTDIR)$(LIBDIR)/$(RELEASE)
+	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.0' -exec rm {} \;
+	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.js' -exec chmod a-x {} \;
+	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'package.json' -exec chmod a-x {} \;
+	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.md' -exec chmod a-x {} \;
+	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'LICENSE' -exec chmod a-x {} \;
 
 uninstall:
-	rm -rf $(DESTDIR)$(LIBDIR)
+	rm -rf $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	rm -rf $(DESTDIR)$(BINDIR)/hopsmtp
 
 #*---------------------------------------------------------------------*/
 #*    clean                                                            */
 #*---------------------------------------------------------------------*/
 clean:
-	rm -f $(SOFILES) configure.so
+	rm -f $(SOFILES) $(HOPSODIR)/configure.so
 
 cleanall: clean
 	rm -f configure.js

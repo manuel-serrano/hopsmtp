@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Wed May 29 08:30:02 2024 (serrano)                */
+#*    Last change :  Tue Jun 18 08:24:56 2024 (serrano)                */
 #*    Copyright   :  2004-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -110,21 +110,21 @@ hopversion=`$hop --configure --version`
 libdir=`$hop --configure --libdir`
 buildtag=`$hop --configure --build-tag`
 buildarch=`$hop --configure --build-arch`
-sodirname=`$hop --configure --so-dirname`
-sodir="$libdir/hopsmtp/$version/so/$hopversion/$buildtag/$buildarch"
+sodir=`$hop --configure --so-dirname`
 
 #*---------------------------------------------------------------------*/
 #*    checking hop installation                                        */
 #*---------------------------------------------------------------------*/
-syslog=$libdir/hop/$hopversion/node_modules/@hop/syslog/hop/$sodirname/syslog.so
+syslog=$libdir/hop/$hopversion/node_modules/@hop/syslog/hop/$sodir/syslog.so
 
+# check that Hop is correctly installed
 if [ ! -f $syslog ]; then
   echo "*** ERROR: Cannot find $syslog"
   exit 1
 fi
 
 #*---------------------------------------------------------------------*/
-#*    Create directories                                               */
+#*    Patch the configuration files                                    */
 #*---------------------------------------------------------------------*/
 for p in bin/hopsmtp configure.js Makefile gdb.cmd; do
   cat $p.in \
@@ -146,6 +146,18 @@ for p in bin/hopsmtp configure.js Makefile gdb.cmd; do
 done
 
 chmod a+rx bin/hopsmtp
+
+#*---------------------------------------------------------------------*/
+#*    Create directories                                               */
+#*---------------------------------------------------------------------*/
+mkdir -p $sodir
+mkdir -p node_modules/iconv-lite/lib/$sodir
+mkdir -p node_modules/iconv-lite/encodings/$sodir
+mkdir -p node_modules/minimist/$sodir
+mkdir -p node_modules/smtp-connection/lib/$sodir
+mkdir -p node_modules/smtp-connection/node_modules/nodemailer-shared/lib/$sodir
+mkdir -p node_modules/smtp-connection/node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib/$sodir
+mkdir -p node_modules/smtp-connection/node_modules/httpntlm/$sodir
 
 #*---------------------------------------------------------------------*/
 #*    Summary                                                          */
