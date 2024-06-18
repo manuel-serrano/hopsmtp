@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Tue Jun 18 08:19:51 2024 (serrano)                */
+#*    Last change :  Tue Jun 18 10:53:50 2024 (serrano)                */
 #*    Copyright   :  2016-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -107,7 +107,7 @@ install:
 	# permissions
 	chmod a+rx $(DESTDIR)$(LIBDIR)/
 	chmod a+rx -R $(DESTDIR)$(LIBDIR)/$(RELEASE)
-	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.0' -exec rm {} \;
+	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.o' -exec rm {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.js' -exec chmod a-x {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'package.json' -exec chmod a-x {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.md' -exec chmod a-x {} \;
