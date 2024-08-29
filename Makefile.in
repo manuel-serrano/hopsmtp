@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Tue Jun 18 10:53:50 2024 (serrano)                */
+#*    Last change :  Thu Aug 29 09:35:45 2024 (serrano)                */
 #*    Copyright   :  2016-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -13,6 +13,8 @@ LIBDIR=@LIBDIR@
 RELEASE=@RELEASE@
 
 HOPSODIR=@SODIR@
+HOPLIBDIR=@HOPLIBDIR@
+HOPVERSION=@HOPVERSION@
 
 HOP = @HOP@
 HOPC = @HOPC@
@@ -112,6 +114,10 @@ install:
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'package.json' -exec chmod a-x {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.md' -exec chmod a-x {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'LICENSE' -exec chmod a-x {} \;
+	# link hiphop into the hop directory
+	cd $(DESTDIR)$(HOPLIBDIR)/hop/$(HOPVERSION)/node_modules/@hop; \
+	rm -f hopsmtp; \
+	ln -s $(DESTDIR)$(LIBDIR)/$(RELEASE) hopsmtp
 
 uninstall:
 	rm -rf $(DESTDIR)$(LIBDIR)/$(RELEASE)

@@ -4,7 +4,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Tue Jun 18 08:24:56 2024 (serrano)                */
+#*    Last change :  Thu Aug 29 09:36:23 2024 (serrano)                */
 #*    Copyright   :  2004-24 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
@@ -107,7 +107,7 @@ done
 #*    sopath                                                           */
 #*---------------------------------------------------------------------*/
 hopversion=`$hop --configure --version`
-libdir=`$hop --configure --libdir`
+hoplibdir=`$hop --configure --libdir`
 buildtag=`$hop --configure --build-tag`
 buildarch=`$hop --configure --build-arch`
 sodir=`$hop --configure --so-dirname`
@@ -115,7 +115,7 @@ sodir=`$hop --configure --so-dirname`
 #*---------------------------------------------------------------------*/
 #*    checking hop installation                                        */
 #*---------------------------------------------------------------------*/
-syslog=$libdir/hop/$hopversion/node_modules/@hop/syslog/hop/$sodir/syslog.so
+syslog=$hoplibdir/hop/$hopversion/node_modules/@hop/syslog/hop/$sodir/syslog.so
 
 # check that Hop is correctly installed
 if [ ! -f $syslog ]; then
@@ -136,12 +136,14 @@ for p in bin/hopsmtp configure.js Makefile gdb.cmd; do
             -e "s|@DEBUG@|$debug|g" \
             -e "s|@BUILDDIR@|$PWD|g" \
             -e "s|@BINDIR@|$bindir|g" \
-            -e "s|@LIBDIR@|$libdir/hopsmtp|g" \
-            -e "s|@LIBPATH@|$libdir/hop/$hopversion|g" \
+            -e "s|@LIBDIR@|$hoplibdir/hopsmtp|g" \
+            -e "s|@LIBPATH@|$hoplibdir/hop/$hopversion|g" \
             -e "s|@HOP@|$hop|g" \
             -e "s|@HOPC@|$hopc|g" \
             -e "s|@HFLAGS@|$hflags|g" \
             -e "s|@SODIR@|$sodir|g" \
+            -e "s|@HOPLIBDIR@|$hoplibdir|g" \
+            -e "s|@HOPVERSION@|$hopversion|g" \
   > $p
 done
 

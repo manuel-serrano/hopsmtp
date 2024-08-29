@@ -1,9 +1,9 @@
 /*=====================================================================*/
-/*    serrano/prgm/utils/hopsmtp/hopsmtp.mjs                           */
+/*    serrano/prgm/utils/hopsmtp/hopsmtp.js                            */
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Wed May 29 08:42:23 2024 (serrano)                */
+/*    Last change :  Tue Jul  2 07:55:54 2024 (serrano)                */
 /*    Copyright   :  2016-24 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -801,7 +801,7 @@ async function main(argv) {
 	 .then(o => exit(0))
 	 .catch(o => fail(o, 1));
    } else {
-      syslog.open("hopsmtp", syslog.LOG_PID | syslog.LOG_ODELAY);
+      syslog.open("hopsmtp", syslog.LOG_PID | syslog.LOG_ODELAY | syslog.LOG_ERR);
 
       readMessage(process.stdin)
 	 .then(o => sendOrQueue(config, o, args.force))
