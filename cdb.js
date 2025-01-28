@@ -3,14 +3,14 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Wed Jan  6 15:20:35 2021                          */
-/*    Last change :  Wed Dec 22 10:41:23 2021 (serrano)                */
-/*    Copyright   :  2021 Manuel Serrano                               */
+/*    Last change :  Tue Jan 28 08:47:25 2025 (serrano)                */
+/*    Copyright   :  2021-25 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    Contact database (for encryption and for smtp server selection)  */
 /*=====================================================================*/
 import fs from 'fs';
 import path from 'path';
-import { load } from 'hop:vcf';
+import { load } from '@hop/vcf';
 
 /*---------------------------------------------------------------------*/
 /*    loadCDB ...                                                      */
