@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu Jan 30 11:39:30 2025 (serrano)                */
+/*    Last change :  Tue Aug 26 16:14:00 2025 (serrano)                */
 /*    Copyright   :  2016-25 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -22,7 +22,7 @@ import * as os from "node:os";
 
 import * as Syslog from "@hop/syslog";
 import { loadCDB, findCDB } from "./cdb.js";
-import { system, systemSync } from "@hop/system";
+import { system } from "@hop/system";
 import minimist from 'minimist';
 
 /*---------------------------------------------------------------------*/
