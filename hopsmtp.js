@@ -21,7 +21,7 @@ import * as path from "node:path";
 import * as os from "node:os";
 
 import * as Syslog from "@hop/syslog";
-import { system, systemSync } from "@hop/system";
+import { system } from "@hop/system";
 import minimist from 'minimist';
 import { version } from "./configure.js";
 
