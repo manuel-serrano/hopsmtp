@@ -3,7 +3,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Oct  1 13:09:48 2016                          */
-/*    Last change :  Thu Jan 30 11:39:30 2025 (serrano)                */
+/*    Last change :  Wed Aug 27 11:19:23 2025 (serrano)                */
 /*    Copyright   :  2016-25 Manuel Serrano                            */
 /*    -------------------------------------------------------------    */
 /*    hopsmtp.js                                                       */
@@ -21,9 +21,9 @@ import * as path from "node:path";
 import * as os from "node:os";
 
 import * as Syslog from "@hop/syslog";
-import { loadCDB, findCDB } from "./cdb.js";
 import { system, systemSync } from "@hop/system";
 import minimist from 'minimist';
+import { version } from "./configure.js";
 
 /*---------------------------------------------------------------------*/
 /*    constant                                                         */
@@ -37,7 +37,6 @@ const XSMTPmethodrx = /^[ \t]*X-Message-SMTP-Method:[ \t]*([^\r\n]+)/mi;
 let config;
 let args;
 let dbg = false;
-let cdb = [];
 let syslog = Syslog; // syslog is overiden in debug mode
 
 /*---------------------------------------------------------------------*/
@@ -55,7 +54,7 @@ function debug(... args) {
    
    if (dbg) {
       fs.writeSync(dbg.fd, "[");
-      fs.writeSync(dbg.fd, dbg.date);
+      fs.writeSync(dbg.fd, dbg.date.toString());
       fs.writeSync(dbg.fd, "] ");
       args.forEach(a => fs.writeSync(dbg.fd, toString(a)));
       fs.writeSync(dbg.fd, "\n");
@@ -432,8 +431,6 @@ function sendStmpMessage(config, message) {
 
       debug(`sending mail to ${message.to} via ${conn.host}:${conn.port}`);
 
-      const contact = findCDB(cdb, message.to);
-
       const buf = iconv.encode(message.msg, "latin1");
       debug("encoded ", message.msg.length, " characters");
       
@@ -716,7 +713,7 @@ async function main(argv) {
    args = minimist(argv, { names: ["-oi", "-bp", "-oQ", "-os"] });
 
    if (args.h || args.help) {
-      console.log("hopsmpt v" + require("./configure.js").version);
+      console.log("hopsmpt v" + version);
       console.log("usage: hopsmpt [options] ...");
       console.log("");
       console.log("Options:");
@@ -731,7 +728,6 @@ async function main(argv) {
       console.log("  -wq        Process the queue only if in work period");
       console.log("  -t         Read message, searching for recipients");
       console.log("  --force    Force sending immediately");
-      console.log("  --nocdb    Do not load contact database");
       console.log("  -g         Internal debug");
       process.exit(0);
    }
@@ -759,11 +755,6 @@ async function main(argv) {
    }
    if (args.oQ) {
       config.queue = args.oQ;
-   }
-   
-   if (!args.nocdb && config.contacts) {
-      // load the contact database
-      cdb = loadCDB(config.contacts);
    }
    
    if (args.queue === "on") {

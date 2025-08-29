@@ -9,4 +9,5 @@
 /*    hopsmtp configuration                                            */
 /*=====================================================================*/
 
-exports.version = "@RELEASE@";
+export const version = "@RELEASE@";
+export const buildid = "@BUILDID@";

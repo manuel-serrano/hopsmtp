@@ -4,8 +4,8 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Sat Jul 31 06:49:37 2004                          */
-#*    Last change :  Thu Aug 29 09:36:23 2024 (serrano)                */
-#*    Copyright   :  2004-24 Manuel Serrano                            */
+#*    Last change :  Wed Aug 27 09:49:16 2025 (serrano)                */
+#*    Copyright   :  2004-25 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    HOPSTMP autoconfiguration                                        */
 #*=====================================================================*/
@@ -18,6 +18,7 @@ version=`grep version package.json | awk '{ print $2 }' | sed 's/[",]//g'`
 license=`grep license package.json | awk '{ print $2 }' | sed 's/[",]//g'`
 date=`date +'%d %B %Y'`
 minor=
+buildid=
 
 license=gpl
 
@@ -104,6 +105,13 @@ while : ; do
 done
 
 #*---------------------------------------------------------------------*/
+#*    buildid                                                          */
+#*---------------------------------------------------------------------*/
+if [ " $buildid" = " " ]; then
+  buildid=`git rev-parse --short HEAD`
+fi
+
+#*---------------------------------------------------------------------*/
 #*    sopath                                                           */
 #*---------------------------------------------------------------------*/
 hopversion=`$hop --configure --version`
@@ -128,22 +136,25 @@ fi
 #*---------------------------------------------------------------------*/
 for p in bin/hopsmtp configure.js Makefile gdb.cmd; do
   cat $p.in \
-      | sed -e "s|@RELEASE@|$version|g" \
-            -e "s|@BRANCH@|$branch|g" \
-            -e "s|@MAIN@|$main|g" \
-            -e "s|@DATE@|$date|g" \
-            -e "s|@DEVEL@|$devel|g" \
-            -e "s|@DEBUG@|$debug|g" \
-            -e "s|@BUILDDIR@|$PWD|g" \
-            -e "s|@BINDIR@|$bindir|g" \
-            -e "s|@LIBDIR@|$hoplibdir/hopsmtp|g" \
-            -e "s|@LIBPATH@|$hoplibdir/hop/$hopversion|g" \
-            -e "s|@HOP@|$hop|g" \
-            -e "s|@HOPC@|$hopc|g" \
-            -e "s|@HFLAGS@|$hflags|g" \
-            -e "s|@SODIR@|$sodir|g" \
-            -e "s|@HOPLIBDIR@|$hoplibdir|g" \
-            -e "s|@HOPVERSION@|$hopversion|g" \
+    | sed -e "s|@RELEASE@|$version|g" \
+	  -e "s|@VERSION@|$version|g" \
+	  -e "s|@BUILDID@|$buildid|g" \
+	  -e "s|@HOPSMTPBUILDID@|$buildid|g" \
+          -e "s|@BRANCH@|$branch|g" \
+          -e "s|@MAIN@|$main|g" \
+          -e "s|@DATE@|$date|g" \
+          -e "s|@DEVEL@|$devel|g" \
+          -e "s|@DEBUG@|$debug|g" \
+          -e "s|@BUILDDIR@|$PWD|g" \
+          -e "s|@BINDIR@|$bindir|g" \
+          -e "s|@LIBDIR@|$hoplibdir/hopsmtp|g" \
+          -e "s|@LIBPATH@|$hoplibdir/hop/$hopversion|g" \
+          -e "s|@HOP@|$hop|g" \
+          -e "s|@HOPC@|$hopc|g" \
+          -e "s|@HFLAGS@|$hflags|g" \
+          -e "s|@SODIR@|$sodir|g" \
+          -e "s|@HOPLIBDIR@|$hoplibdir|g" \
+          -e "s|@HOPVERSION@|$hopversion|g" \
   > $p
 done
 
@@ -172,6 +183,7 @@ echo "** Configuration summary **"
 echo 
 echo "Release:"
 echo "  hopsmtp release number................ $version"
+echo "  hopsmtp build id...................... $buildid"
 echo "  hop command........................... $hop $hopversion"
 echo "  hopc command.......................... $hopc"
 echo "  hflags ............................... $hflags"

@@ -3,7 +3,7 @@
 #*    -------------------------------------------------------------    */
 #*    Author      :  Manuel Serrano                                    */
 #*    Creation    :  Tue Oct  4 14:43:55 2016                          */
-#*    Last change :  Tue Jan 28 08:52:27 2025 (serrano)                */
+#*    Last change :  Wed Aug 27 09:44:13 2025 (serrano)                */
 #*    Copyright   :  2016-25 Manuel Serrano                            */
 #*    -------------------------------------------------------------    */
 #*    install                                                          */
@@ -16,58 +16,69 @@ HOPSODIR=@SODIR@
 HOPLIBDIR=@HOPLIBDIR@
 HOPVERSION=@HOPVERSION@
 
-HOP = @HOP@
-HOPC = @HOPC@
-HFLAGS = @HFLAGS@
+HOPSMTPBUILDID=@HOPSMTPBUILDID@
+HOPSMTPNPMDIR=hopsmtp-$(RELEASE)-$(HOPSMTPBUILDID)
 
-ICONVLIB = index.js streams.js bom-handling.js extend-node.js
-ICONVENC = dbcs-codec.js index.js sbcs-codec.js sbcs-data.js utf16.js \
+
+HOP=@HOP@
+HOPC=@HOPC@
+HFLAGS=@HFLAGS@
+
+ICONVLIB=index.js streams.js bom-handling.js extend-node.js
+ICONVENC=dbcs-codec.js index.js sbcs-codec.js sbcs-data.js utf16.js \
   dbcs-data.js internal.js sbcs-data-generated.js utf7.js
-ICONV = $(ICONVLIB:%=lib/%) $(ICONVENC:%=encodings/%)
-ICONVSO = $(ICONVLIB:%.js=lib/$(HOPSODIR)/%.so) \
+ICONV=$(ICONVLIB:%=lib/%) $(ICONVENC:%=encodings/%)
+ICONVSO=$(ICONVLIB:%.js=lib/$(HOPSODIR)/%.so) \
   $(ICONVENC:%.js=encodings/$(HOPSODIR)/%.so)
 
-MINIMIST = index.js
-MINIMISTSO = $(MINIMIST:%.js=$(HOPSODIR)/%.so)
+MINIMIST=index.js
+MINIMISTSO=$(MINIMIST:%.js=$(HOPSODIR)/%.so)
 
-SMTPJSFILES = data-stream.js smtp-connection.js 
-SMTPLIBDIR = lib
-SMTPLIB = $(SMTPJSFILES:%=$(SMTPLIBDIR)/%)
-SMTPLIBSO = $(SMTPJSFILES:%.js=$(SMTPLIBDIR)/$(HOPSODIR)/%.so)
+SMTPJSFILES=data-stream.js smtp-connection.js 
+SMTPLIBDIR=lib
+SMTPLIB=$(SMTPJSFILES:%=$(SMTPLIBDIR)/%)
+SMTPLIBSO=$(SMTPJSFILES:%.js=$(SMTPLIBDIR)/$(HOPSODIR)/%.so)
 
-SMTPSHAREDLIBFILES = shared.js
-SMTPSHAREDLIBDIR = node_modules/nodemailer-shared/lib
-SMTPSHAREDLIB = $(SMTPSHAREDLIBFILES:%=$(SMTPSHAREDLIBDIR)/%)
-SMTPSHAREDLIBSO = $(SMTPSHAREDLIBFILES:%.js=$(SMTPSHAREDLIBDIR)/$(HOPSODIR)/%.so)
+SMTPSHAREDLIBFILES=shared.js
+SMTPSHAREDLIBDIR=node_modules/nodemailer-shared/lib
+SMTPSHAREDLIB=$(SMTPSHAREDLIBFILES:%=$(SMTPSHAREDLIBDIR)/%)
+SMTPSHAREDLIBSO=$(SMTPSHAREDLIBFILES:%.js=$(SMTPSHAREDLIBDIR)/$(HOPSODIR)/%.so)
 
-SMTPSHAREDFETCHFILES = cookies.js fetch.js
-SMTPSHAREDFETCHDIR = node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib
-SMTPSHAREDFETCH = $(SMTPSHAREDFETCHFILES:%=$(SMTPSHAREDFETCHDIR)/%)
-SMTPSHAREDFETCHSO = $(SMTPSHAREDFETCHFILES:%.js=$(SMTPSHAREDFETCHDIR)/$(HOPSODIR)/%.so)
+SMTPSHAREDFETCHFILES=cookies.js fetch.js
+SMTPSHAREDFETCHDIR=node_modules/nodemailer-shared/node_modules/nodemailer-fetch/lib
+SMTPSHAREDFETCH=$(SMTPSHAREDFETCHFILES:%=$(SMTPSHAREDFETCHDIR)/%)
+SMTPSHAREDFETCHSO=$(SMTPSHAREDFETCHFILES:%.js=$(SMTPSHAREDFETCHDIR)/$(HOPSODIR)/%.so)
 
-SMTPHTTPNTLMFILES = ntlm.js
-SMTPHTTPNTLMDIR = node_modules/httpntlm
-SMTPHTTPNTLM = $(SMTPHTTPNTLMFILES:%=$(SMTPHTTPNTLMDIR)/%)
-SMTPHTTPNTLMSO = $(SMTPHTTPNTLMFILES:%.js=$(SMTPHTTPNTLMDIR)/$(HOPSODIR)/%.so)
+SMTPHTTPNTLMFILES=ntlm.js
+SMTPHTTPNTLMDIR=node_modules/httpntlm
+SMTPHTTPNTLM=$(SMTPHTTPNTLMFILES:%=$(SMTPHTTPNTLMDIR)/%)
+SMTPHTTPNTLMSO=$(SMTPHTTPNTLMFILES:%.js=$(SMTPHTTPNTLMDIR)/$(HOPSODIR)/%.so)
 
-SMTP = $(SMTPLIB) $(SMTPSHAREDLIB) $(SMTPSHAREDFETCH) $(SMTPHTTPNTLM)
-SMTPSO = $(SMTPLIBSO) $(SMTPSHAREDLIBSO) $(SMTPSHAREDFETCHSO) $(SMTPHTTPNTLMSO)
+SMTP=$(SMTPLIB) $(SMTPSHAREDLIB) $(SMTPSHAREDFETCH) $(SMTPHTTPNTLM)
+SMTPSO=$(SMTPLIBSO) $(SMTPSHAREDLIBSO) $(SMTPSHAREDFETCHSO) $(SMTPHTTPNTLMSO)
 
-HOPSMTP = hopsmtp.js cdb.js
-HOPSMTPSO = $(HOPSMTP:%.js=$(HOPSODIR)/%.so)
+HOPSMTP=hopsmtp.js configure.js
+HOPSMTPSO=$(HOPSMTP:%.js=$(HOPSODIR)/%.so)
 
-SOURCES = $(HOPSMTP) \
+SOURCES=$(HOPSMTP) \
   $(ICONV:%=node_modules/iconv-lite/%) \
   $(MINIMIST:%=node_modules/minimist/%) \
   $(SMTP:%=node_modules/smtp-connection/%)
 
-SOFILES = $(HOPSMTPSO) \
+PACKAGEJSON=iconv-lite minimist smtp-connection \
+  smtp-connection/node_modules/nodemailer-shared/node_modules/nodemailer-fetch \
+  smtp-connection/node_modules/nodemailer-shared \
+  smtp-connection/node_modules/httpntlm/node_modules/underscore \
+  smtp-connection/node_modules/httpntlm/node_modules/httpreq \
+  smtp-connection/node_modules/httpntlm
+
+SOFILES=$(HOPSMTPSO) \
   $(ICONVSO:%=node_modules/iconv-lite/%) \
   $(MINIMISTSO:%=node_modules/minimist/%) \
   $(SMTPSO:%=node_modules/smtp-connection/%)
 
 SODIR= @SODIR@
-JSDIR = $(LIBDIR)/$(RELEASE)
+JSDIR=$(LIBDIR)/$(RELEASE)
 
 #*---------------------------------------------------------------------*/
 #*    do:                                                              */
@@ -87,6 +98,10 @@ do: $(SOFILES) $(HOPSODIR)/configure.so
 %.so: ../../../../%.js
 	$(HOPC) $(HFLAGS) -y -o $@ $<
 
+npm/$(HOPSMTPNPMDIR)/%: %
+	mkdir -p npm/$(HOPSMTPNPMDIR)/`dirname $<`
+	cp $< $@
+
 #*---------------------------------------------------------------------*/
 #*    install                                                          */
 #*---------------------------------------------------------------------*/
@@ -102,7 +117,6 @@ install:
 	cp -r so $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf node_modules $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf hopsmtp.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
-	cp -rf cdb.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf configure.js $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	cp -rf package.json $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	find $(DESTDIR)$(SODIR) -name 'package.json' -exec chmod a+r {} \;
@@ -114,7 +128,7 @@ install:
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'package.json' -exec chmod a-x {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name '*.md' -exec chmod a-x {} \;
 	find $(DESTDIR)$(LIBDIR)/$(RELEASE) -name 'LICENSE' -exec chmod a-x {} \;
-	# link hiphop into the hop directory
+	# link hopsmtp into the hop directory
 	cd $(DESTDIR)$(HOPLIBDIR)/hop/$(HOPVERSION)/node_modules/@hop; \
 	rm -f hopsmtp; \
 	ln -s $(DESTDIR)$(LIBDIR)/$(RELEASE) hopsmtp
@@ -122,6 +136,38 @@ install:
 uninstall:
 	rm -rf $(DESTDIR)$(LIBDIR)/$(RELEASE)
 	rm -rf $(DESTDIR)$(BINDIR)/hopsmtp
+
+#*---------------------------------------------------------------------*/
+#*    npm                                                              */
+#*---------------------------------------------------------------------*/
+.PHONY: npm npm-module npm-dirs npm-src npm-src-hop
+
+npm-dirs:
+	mkdir -p npm/$(HOPSMTPNPMDIR)
+	mkdir -p npm/$(HOPSMTPNPMDIR)/bin
+
+npm-src: $(SOURCES:%=npm/$(HOPSMTPNPMDIR)/%) $(PACKAGEJSON:%=npm/$(HOPSMTPNPMDIR)/node_modules/%/package.json)
+	cat npm/$(HOPSMTPNPMDIR)/hopsmtp.js \
+             | sed -e 's/"use hopscript"/import { createRequire } from "module"; const require = createRequire(import.meta.url)/' \
+                   -e 's/#:exception-notify/console.error/' \
+             > npm/$(HOPSMTPNPMDIR)/hopsmtp.mjs
+	rm npm/$(HOPSMTPNPMDIR)/hopsmtp.js
+
+npm-bin:
+	echo "#!/usr/bin/env node" > npm/$(HOPSMTPNPMDIR)/bin/hopsmtp
+	echo "import * as hopsmtp from \"../hopsmtp.mjs\"" >> npm/$(HOPSMTPNPMDIR)/bin/hopsmtp
+	chmod a+rx npm/$(HOPSMTPNPMDIR)/bin/hopsmtp
+
+npm-sans-rm: npm-dirs 
+	cp package.json npm/$(HOPSMTPNPMDIR)
+	cp -r bin npm/$(HOPSMTPNPMDIR)
+	$(MAKE) npm-src
+	$(MAKE) npm-bin
+	(cd npm; tar --exclude="*.so" -zcvf $(HOPSMTPNPMDIR).tgz $(HOPSMTPNPMDIR))
+
+npm: npm-sans-rm
+	(cd npm; rm -rf $(HOPSMTPNPMDIR))
+
 
 #*---------------------------------------------------------------------*/
 #*    clean                                                            */
