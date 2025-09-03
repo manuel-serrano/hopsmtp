@@ -8,6 +8,9 @@
       "hop": ">=3.7.0" ,
       "node": ">=18.13.0" 
    },
+   "bin": {
+     "hopsmtp": "./bin/hopsmtp.mjs",
+   },
    "type": "module",
    "main": "hopsmtp.js",
    "dependencies": {
