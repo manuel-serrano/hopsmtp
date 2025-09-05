@@ -9,7 +9,7 @@
       "node": ">=18.13.0" 
    },
    "bin": {
-     "hopsmtp": "./bin/hopsmtp.mjs",
+     "hopsmtp": "./bin/hopsmtp.mjs"
    },
    "type": "module",
    "main": "hopsmtp.js",
